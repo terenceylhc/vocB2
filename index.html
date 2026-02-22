@@ -1,209 +1,306 @@
-import base64
-import requests
-import json
-
-# 配置資訊
-TITLE = "🧠 B2L1 互動單字記憶卡"
-IMAGE_URLS = [
-    "https://github.com/terenceylhc/vocB2/blob/main/B2L1G1.jpg?raw=true",
-    "https://github.com/terenceylhc/vocB2/blob/main/B2L1G2.jpg?raw=true"
-]
-
-# 單字資料庫
-vocabulary_data = [
-    {"word": "attraction", "symbol": "[əˋtrækʃən]", "pos": "n.", "mean": "有吸引力的景點", "strategy": "諧音 (台語/國語)", "mnemonic": "阿！扯(A-trac)到一頭金牛來吸引遊客。", "grid": 0, "p": 0},
-    {"word": "local", "symbol": "[ˋlokḷ]", "pos": "adj./n.", "mean": "當地的/當地人", "strategy": "諧音 (台語)", "mnemonic": "當地的阿伯「摟扣」(Lō-khò) 在乘涼。", "grid": 0, "p": 1},
-    {"word": "plain", "symbol": "[plen]", "pos": "adj.", "mean": "樸素的", "strategy": "聯想", "mnemonic": "這件衣服像「平」原 (Plain) 一樣樸素。", "grid": 0, "p": 2},
-    {"word": "counter", "symbol": "[ˋkaᴜntɚ]", "pos": "n.", "mean": "櫃臺", "strategy": "諧音 (國語)", "mnemonic": "在櫃檯「看她」(Kàn tā) 結帳。", "grid": 0, "p": 3},
-    {"word": "hug", "symbol": "[hʌg]", "pos": "vt./n.", "mean": "擁抱", "strategy": "諧音 (國語)", "mnemonic": "「哈哥」(Hagrid) 在給哈利波特一個大擁抱。", "grid": 0, "p": 4},
-    {"word": "pleased", "symbol": "[plizd]", "pos": "adj.", "mean": "高興的", "strategy": "諧音 (國語)", "mnemonic": "拿到「普里茲」(Pritz) 獎好高興。", "grid": 0, "p": 5},
-    {"word": "mood", "symbol": "[mud]", "pos": "n.", "mean": "心情", "strategy": "諧音 (國語)", "mnemonic": "心情好就去「牧」(Mood) 場看牛。", "grid": 0, "p": 6},
-    {"word": "unfairly", "symbol": "[ʌnˋfɛrlɪ]", "pos": "adv.", "mean": "不公平地", "strategy": "諧音 (國語)", "mnemonic": "這「案非常」(Un-fair) 不公平，天秤歪掉了。", "grid": 0, "p": 7},
-    {"word": "observe", "symbol": "[əbˋzɝv]", "pos": "vt.", "mean": "觀察", "strategy": "諧音 (國語)", "mnemonic": "阿伯樂在觀察美麗的蝴蝶。", "grid": 0, "p": 8},
-    {"word": "customer", "symbol": "[ˋkʌstəmɚ]", "pos": "n.", "mean": "顧客", "strategy": "諧音 (國語)", "mnemonic": "顧客太多，百貨門口「卡死他媽」了。", "grid": 0, "p": 9},
-    {"word": "seem", "symbol": "[sim]", "pos": "vi.", "mean": "好像/似乎", "strategy": "諧音 (國語)", "mnemonic": "這「西」(See-m) 瓜看起來好像是真的，其實是蛋糕。", "grid": 0, "p": 10},
-    {"word": "reveal", "symbol": "[rɪˋvil]", "pos": "vt.", "mean": "揭露/透露", "strategy": "字根拆解", "mnemonic": "除去(re-) 面紗(veil)，真相被揭露。", "grid": 0, "p": 11},
-    {"word": "secret", "symbol": "[ˋsikrɪt]", "pos": "n./adj.", "mean": "秘密", "strategy": "諧音 (台語)", "mnemonic": "守住這個秘密守得很「水氣」(suí-khì)。", "grid": 0, "p": 12},
-    {"word": "amazed", "symbol": "[əˋmezd]", "pos": "adj.", "mean": "感到驚奇的", "strategy": "諧音 (國語)", "mnemonic": "看到「阿妹」(A-Mei) 唱歌，大家驚奇得掉下巴。", "grid": 0, "p": 13},
-    {"word": "earn", "symbol": "[ɝn]", "pos": "vt.", "mean": "賺得", "strategy": "諧音 (國語)", "mnemonic": "用力「恩」(Earn) 的一聲，賺到金幣。", "grid": 0, "p": 14},
-    {"word": "café", "symbol": "[kəˋfe]", "pos": "n.", "mean": "咖啡店", "strategy": "諧音 (國語)", "mnemonic": "在「咖啡」店喝咖啡。", "grid": 0, "p": 15},
-    {"word": "euro", "symbol": "[ˋjᴜro]", "pos": "n.", "mean": "歐元", "strategy": "諧音 (國語)", "mnemonic": "「有肉」(eu-ro) 吃就要用歐元買。", "grid": 1, "p": 0},
-    {"word": "nationality", "symbol": "[͵næʃəˋnælətɪ]", "pos": "n.", "mean": "國籍", "strategy": "諧音 (國語)", "mnemonic": "「奶昔拿去」(na-tion-ali-ty) 給不同國籍的人喝。", "grid": 1, "p": 1},
-    {"word": "pay off", "symbol": "[pe ɔf]", "pos": "phr.", "mean": "得到好結果", "strategy": "諧音 (國語)", "mnemonic": "努力「賠」(pay) 到「光」(off)，最後卻贏到翻倍。", "grid": 1, "p": 2},
-    {"word": "right away", "symbol": "[raɪt əˋwe]", "pos": "phr.", "mean": "立刻/馬上", "strategy": "諧音 (國語)", "mnemonic": "「萊特」(right) 兄弟「阿威」(away) 立刻起飛。", "grid": 1, "p": 3},
-    {"word": "stand out", "symbol": "[stænd aʊt]", "pos": "phr.", "mean": "突出/出眾", "strategy": "諧音 (國語)", "mnemonic": "「死站在外面」(stand out) 的人最突出。", "grid": 1, "p": 4},
-    {"word": "burst out", "symbol": "[bɝst aʊt]", "pos": "phr.", "mean": "突然...", "strategy": "諧音 (國語)", "mnemonic": "「巴士」(burst) 撞「掉」(out) 牆壁，突然衝出來。", "grid": 1, "p": 5},
-    {"word": "have nothing to do with", "symbol": "[hæv ˋnʌθɪŋ tə du wɪð]", "pos": "phr.", "mean": "與...無關", "strategy": "諧音 (國語)", "mnemonic": "這裡「拿不到」(nothing to do) 東西，與我無關。", "grid": 1, "p": 6},
-]
-
-# 抓取並轉換 Base64
-base64_data = []
-for url in IMAGE_URLS:
-    print(f"正在下載圖片: {url}")
-    res = requests.get(url)
-    b64 = base64.b64encode(res.content).decode('utf-8')
-    base64_data.append(f"data:image/jpeg;base64,{b64}")
-
-# 生成 HTML 內容
-html_template = f"""
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{TITLE}</title>
+    <title>🧠 B2L1 互動單字記憶卡</title>
     <style>
-        :root {{
-            --primary: #2C3E50;
-            --accent: #E67E22;
+        :root {
+            --primary: #2C3E50; /* 深海藍 */
+            --accent: #E67E22;  /* 活力橘 */
             --bg: #F4F7F6;
-            --card-bg: #FFFFFF;
-        }}
-        body {{
+            --white: #FFFFFF;
+            --text: #34495E;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
             background-color: var(--bg);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-        }}
-        h1 {{ color: var(--primary); margin-bottom: 30px; }}
-        .grid {{
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin: 20px 0 30px;
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* 響應式網格佈局 */
+        .vocab-grid {
             display: grid;
-            gap: 20px;
+            gap: 25px;
             width: 100%;
             max-width: 1000px;
+            /* 電腦版：每列 2 張 */
             grid-template-columns: repeat(2, 1fr);
-        }}
-        @media (max-width: 768px) {{
-            .grid {{ grid-template-columns: 1fr; }}
-        }}
-        .card {{
-            background: transparent;
-            height: 400px;
+        }
+
+        @media (max-width: 768px) {
+            /* 手機版：每列 1 張 */
+            .vocab-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 3D 翻牌效果 */
+        .card {
+            height: 420px;
             perspective: 1000px;
             cursor: pointer;
-        }}
-        .card-inner {{
+        }
+
+        .card-inner {
             position: relative;
-            width: 100%; height: 100%;
-            text-align: center;
+            width: 100%;
+            height: 100%;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             transform-style: preserve-3d;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border-radius: 15px;
-        }}
-        .card.flipped .card-inner {{ transform: rotateY(180deg); }}
-        .card-front, .card-back {{
-            position: absolute;
-            width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 15px;
-            overflow: hidden;
-            display: flex; flex-direction: column;
-            background: var(--card-bg);
-        }}
-        .card-back {{ transform: rotateY(180deg); padding: 20px; box-sizing: border-box; justify-content: center; }}
-        
-        /* 影像區 (Sprite) */
-        .image-container {{
-            width: 100%;
-            aspect-ratio: 16/9;
-            background-size: 400% 400%;
-            border-bottom: 1px solid #eee;
-        }}
-        
-        .info-section {{ flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 10px; }}
-        .word-row {{ display: flex; align-items: center; justify-content: center; gap: 10px; }}
-        .word {{ font-size: 2.2rem; font-weight: bold; color: var(--primary); margin: 5px 0; }}
-        .symbol {{ font-size: 1.1rem; color: #7F8C8D; }}
-        .pronounce-btn {{
-            background: var(--primary); color: white; border: none;
-            width: 35px; height: 35px; border-radius: 50%;
-            cursor: pointer; font-size: 1.2rem; transition: 0.2s;
-        }}
-        .pronounce-btn:hover {{ transform: scale(1.1); background: var(--accent); }}
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-radius: 20px;
+        }
 
-        /* 背面樣式 */
-        .back-word {{ font-size: 2.5rem; color: var(--primary); margin-bottom: 5px; }}
-        .back-pos {{ font-style: italic; color: #95A5A6; margin-bottom: 15px; }}
-        .back-mean {{ font-size: 1.5rem; font-weight: bold; color: #34495E; margin-bottom: 20px; }}
-        .back-strategy {{ text-align: left; background: #ECF0F1; padding: 10px; border-radius: 8px; margin-bottom: 10px; }}
-        .back-mnemonic {{ 
-            font-size: 1.3rem; font-weight: bold; color: var(--accent); 
-            background: #FEF5ED; padding: 15px; border-radius: 8px;
-            border-left: 5px solid var(--accent);
-        }}
+        .card.is-flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            background: var(--white);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            padding: 25px;
+            justify-content: center;
+            border: 2px solid var(--primary);
+        }
+
+        /* 影像區域 (Sprite 邏輯) */
+        .sprite-img {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-repeat: no-repeat;
+            background-size: 400% 400%; /* 4x4 網格 */
+            border-bottom: 1px solid #eee;
+        }
+
+        /* 正面文字區 */
+        .front-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .word-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .word-text {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .btn-audio {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .btn-audio:hover { background: var(--accent); transform: scale(1.1); }
+
+        .phonetic {
+            font-size: 1.1rem;
+            color: #7F8C8D;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* 背面詳細內容 */
+        .back-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 5px;
+            text-align: center;
+        }
+
+        .back-pos {
+            font-style: italic;
+            color: #95A5A6;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .back-mean {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--text);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .back-strategy-box {
+            background: #F8F9F9;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .strategy-label {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .mnemonic-box {
+            background: #FEF5ED;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 6px solid var(--accent);
+        }
+
+        .mnemonic-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent);
+            line-height: 1.4;
+        }
+
     </style>
 </head>
 <body>
-    <h1>{TITLE}</h1>
-    <div class="grid" id="vocabGrid"></div>
+
+    <h1>🧠 B2L1 互動單字記憶卡</h1>
+    <div class="vocab-grid" id="mainGrid"></div>
 
     <script>
-        const vocabData = {json.dumps(vocabulary_data)};
-        const images = {json.dumps(base64_data)};
+        // 資料源：包含 Gem 1 文字與座標計算
+        const rawData = [
+            { en: "attraction", ph: "[əˋtrækʃən]", cn: "有吸引力的景點", grid: 1, pos: 1, strategy: "諧音 (台語/國語)", mnemonic: "阿！扯(A-trac)到一頭金牛來吸引遊客。", pos_tag: "n." },
+            { en: "local", ph: "[ˋlokḷ]", cn: "當地的/當地人", grid: 1, pos: 2, strategy: "諧音 (台語)", mnemonic: "當地的阿伯「摟扣」(Lō-khò) 在乘涼。", pos_tag: "adj./n." },
+            { en: "plain", ph: "[plen]", cn: "樸素的", grid: 1, pos: 3, strategy: "聯想", mnemonic: "這件衣服像「平」原 (Plain) 一樣樸素。", pos_tag: "adj." },
+            { en: "counter", ph: "[ˋkaᴜntɚ]", cn: "櫃臺", grid: 1, pos: 4, strategy: "諧音 (國語)", mnemonic: "在櫃檯「看她」(Kàn tā) 結帳。", pos_tag: "n." },
+            { en: "hug", ph: "[hʌg]", cn: "擁抱", grid: 1, pos: 5, strategy: "諧音 (國語)", mnemonic: "「哈哥」(Hagrid) 在給哈利波特一個大擁抱。", pos_tag: "vt./n." },
+            { en: "pleased", ph: "[plizd]", cn: "高興的", grid: 1, pos: 6, strategy: "諧音 (國語)", mnemonic: "拿到「普里茲」(Pritz) 獎好高興。", pos_tag: "adj." },
+            { en: "mood", ph: "[mud]", cn: "心情", grid: 1, pos: 7, strategy: "諧音 (國語)", mnemonic: "心情好就去「牧」(Mood) 場看牛。", pos_tag: "n." },
+            { en: "unfairly", ph: "[ʌnˋfɛrlɪ]", cn: "不公平地", grid: 1, pos: 8, strategy: "諧音 (國語)", mnemonic: "這「案非常」(Un-fair) 不公平，天秤歪掉了。", pos_tag: "adv." },
+            { en: "observe", ph: "[əbˋzɝv]", cn: "觀察", grid: 1, pos: 9, strategy: "諧音 (國語)", mnemonic: "阿伯樂在觀察美麗的蝴蝶。", pos_tag: "vt." },
+            { en: "customer", ph: "[ˋkʌstəmɚ]", cn: "顧客", grid: 1, pos: 10, strategy: "諧音 (國語)", mnemonic: "顧客太多，百貨門口「卡死他媽」了。", pos_tag: "n." },
+            { en: "seem", ph: "[sim]", cn: "好像/似乎", grid: 1, pos: 11, strategy: "諧音 (國語)", mnemonic: "這「西」(See-m) 瓜看起來好像是真的，其實是蛋糕。", pos_tag: "vi." },
+            { en: "reveal", ph: "[rɪˋvil]", cn: "揭露/透露", grid: 1, pos: 12, strategy: "字根拆解", mnemonic: "除去(re-) 面紗(veil)，真相被揭露。", pos_tag: "vt." },
+            { en: "secret", ph: "[ˋsikrɪt]", cn: "秘密", grid: 1, pos: 13, strategy: "諧音 (台語)", mnemonic: "守住這個秘密守得很「水氣」(suí-khì)。", pos_tag: "n./adj." },
+            { en: "amazed", ph: "[əˋmezd]", cn: "感到驚奇的", grid: 1, pos: 14, strategy: "諧音 (國語)", mnemonic: "看到「阿妹」(A-Mei) 唱歌，大家驚奇得掉下巴。", pos_tag: "adj." },
+            { en: "earn", ph: "[ɝn]", cn: "賺得", grid: 1, pos: 15, strategy: "諧音 (國語)", mnemonic: "用力「恩」(Earn) 的一聲，賺到金幣。", pos_tag: "vt." },
+            { en: "café", ph: "[kəˋfe]", cn: "咖啡店", grid: 1, pos: 16, strategy: "諧音 (國語)", mnemonic: "在「咖啡」店喝咖啡。", pos_tag: "n." },
+            { en: "euro", ph: "[ˋjᴜro]", cn: "歐元", grid: 2, pos: 1, strategy: "諧音 (國語)", mnemonic: "「有肉」(eu-ro) 吃就要用歐元買。", pos_tag: "n." },
+            { en: "nationality", ph: "[͵næʃəˋnælətɪ]", cn: "國籍", grid: 2, pos: 2, strategy: "諧音 (國語)", mnemonic: "「奶昔拿去」(na-tion-ali-ty) 給不同國籍的人喝。", pos_tag: "n." },
+            { en: "pay off", ph: "[pe ɔf]", cn: "得到好結果", grid: 2, pos: 3, strategy: "諧音 (國語)", mnemonic: "努力「賠」(pay) 到「光」(off)，最後卻贏到翻倍。", pos_tag: "phr." },
+            { en: "right away", ph: "[raɪt əˋwe]", cn: "立刻/馬上", grid: 2, pos: 4, strategy: "諧音 (國語)", mnemonic: "「萊特」(right) 兄弟「阿威」(away) 立刻起飛。", pos_tag: "phr." },
+            { en: "stand out", ph: "[stænd aʊt]", cn: "突出/出眾", grid: 2, pos: 5, strategy: "諧音 (國語)", mnemonic: "「死站在外面」(stand out) 的人最突出。", pos_tag: "phr." },
+            { en: "burst out", ph: "[bɝst aʊt]", cn: "突然...", grid: 2, pos: 6, strategy: "諧音 (國語)", mnemonic: "「巴士」(burst) 撞「掉」(out) 牆壁，突然衝出來。", pos_tag: "phr." },
+            { en: "have nothing to do with", ph: "[hæv ˋnʌθɪŋ tə du wɪð]", cn: "與...無關", grid: 2, pos: 7, strategy: "諧音 (國語)", mnemonic: "這裡「拿不到」(nothing to do) 東西，與我無關。", pos_tag: "phr." }
+        ];
 
-        function speak(text) {{
+        const imgUrls = [
+            "https://github.com/terenceylhc/vocB2/blob/main/B2L1G1.jpg?raw=true",
+            "https://github.com/terenceylhc/vocB2/blob/main/B2L1G2.jpg?raw=true"
+        ];
+
+        // 隨機洗牌
+        const shuffledData = rawData.sort(() => Math.random() - 0.5);
+
+        // 發音功能
+        function speak(text) {
             const msg = new SpeechSynthesisUtterance(text);
             msg.lang = 'en-US';
+            msg.rate = 0.9;
             window.speechSynthesis.speak(msg);
-        }}
+        }
 
-        function shuffle(array) {{
-            for (let i = array.length - 1; i > 0; i--) {{
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }}
-            return array;
-        }}
+        // 渲染卡片
+        const gridContainer = document.getElementById('mainGrid');
 
-        function renderCards() {{
-            const container = document.getElementById('vocabGrid');
-            shuffle(vocabData).forEach(item => {{
-                const col = item.p % 4;
-                const row = Math.floor(item.p / 4);
-                const posX = (col / 3) * 100;
-                const posY = (row / 3) * 100;
+        shuffledData.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // 計算 4x4 偏移量 (0, 33.333%, 66.666%, 100%)
+            const col = (item.pos - 1) % 4;
+            const row = Math.floor((item.pos - 1) / 4);
+            const xOffset = (col / 3) * 100;
+            const yOffset = (row / 3) * 100;
+            const targetImg = imgUrls[item.grid - 1];
 
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-front">
-                            <div class="image-container" style="background-image: url('${{images[item.grid]}}'); background-position: ${{posX}}% ${{posY}}%;"></div>
-                            <div class="info-section">
-                                <div class="word-row">
-                                    <div class="word">${{item.word}}</div>
-                                    <button class="pronounce-btn" onclick="event.stopPropagation(); speak('${{item.word}}')">🔊</button>
-                                </div>
-                                <div class="symbol">${{item.symbol}}</div>
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-front">
+                        <div class="sprite-img" style="background-image: url('${targetImg}'); background-position: ${xOffset}% ${yOffset}%;"></div>
+                        <div class="front-content">
+                            <div class="word-header">
+                                <span class="word-text">${item.en}</span>
+                                <button class="btn-audio" onclick="event.stopPropagation(); speak('${item.en}')">🔊</button>
                             </div>
-                        </div>
-                        <div class="card-back">
-                            <div class="back-word">${{item.word}}</div>
-                            <div class="back-pos">${{item.pos}}</div>
-                            <div class="back-mean">${{item.mean}}</div>
-                            <div class="back-strategy"><strong>💡 策略：</strong>${{item.strategy}}</div>
-                            <div class="back-mnemonic">${{item.mnemonic}}</div>
+                            <div class="phonetic">${item.ph}</div>
                         </div>
                     </div>
-                `;
-                card.onclick = () => {{
-                    const isFlippingToBack = !card.classList.contains('flipped');
-                    card.classList.toggle('flipped');
-                    if (isFlippingToBack) {{
-                        setTimeout(() => speak(item.word), 200);
-                    }}
-                }};
-                container.appendChild(card);
-            }});
-        }}
-        renderCards();
+                    <div class="card-back">
+                        <div class="back-title">${item.en}</div>
+                        <div class="back-pos">${item.pos_tag}</div>
+                        <div class="back-mean">${item.cn}</div>
+                        <div class="back-strategy-box">
+                            <span class="strategy-label">💡 記憶策略</span>
+                            <span>${item.strategy}</span>
+                        </div>
+                        <div class="mnemonic-box">
+                            <div class="mnemonic-text">${item.mnemonic}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 翻牌點擊事件
+            card.onclick = () => {
+                const isFlipped = card.classList.toggle('is-flipped');
+                if (isFlipped) {
+                    // 翻到背面時自動朗讀
+                    setTimeout(() => speak(item.en), 200);
+                }
+            };
+
+            gridContainer.appendChild(card);
+        });
     </script>
 </body>
 </html>
-"""
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html_template)
-
-print("\n✅ 成功！已產出自給自足的網頁：index.html")
