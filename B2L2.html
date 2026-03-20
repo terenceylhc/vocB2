@@ -106,41 +106,41 @@
 
     <script>
         const vocabData = [
-            { "id": 1, "word": "rural", "pos": "adj.", "meaning": "農村的", "strategy": "諧音 (路肉)", "mnemonic": "在農村的小路上，擺滿了曬乾的豬肉。", "sprite": 1, "pos_idx": 0 },
-            { "id": 2, "word": "plastic", "pos": "adj.", "meaning": "塑膠的", "strategy": "諧音 (陪老師踢)", "mnemonic": "同學陪老師踢一個塑膠足球。", "sprite": 1, "pos_idx": 1 },
-            { "id": 3, "word": "discover", "pos": "vt.", "meaning": "發現", "strategy": "字根 (dis-不 + cover-蓋住)", "mnemonic": "把蓋子掀開就能發現裡面的寶藏。", "sprite": 1, "pos_idx": 2 },
-            { "id": 4, "word": "stage", "pos": "n.", "meaning": "舞臺", "strategy": "圖像法", "mnemonic": "聚光燈打在圓形的舞臺中央。", "sprite": 1, "pos_idx": 3 },
-            { "id": 5, "word": "outdoor", "pos": "adj.", "meaning": "戶外的", "strategy": "圖像法 (out-門外)", "mnemonic": "踏出那扇門(door)到外面(out)，就是戶外的世界。", "sprite": 1, "pos_idx": 4 },
-            { "id": 6, "word": "chop", "pos": "vt.", "meaning": "切，剁", "strategy": "諧音 (恰恰)", "mnemonic": "廚師邊跳恰恰舞，邊用力地切剁排骨。", "sprite": 1, "pos_idx": 5 },
-            { "id": 7, "word": "ingredient", "pos": "n.", "meaning": "食材", "strategy": "諧音 (硬給地恩)", "mnemonic": "土地硬是要給大地恩惠，長出各種食材。", "sprite": 1, "pos_idx": 6 },
-            { "id": 8, "word": "deliver", "pos": "vt.", "meaning": "遞送", "strategy": "諧音 (地利划)", "mnemonic": "快遞員利用河流地利之便，拼命划船去遞送包裹。", "sprite": 1, "pos_idx": 7 },
-            { "id": 9, "word": "decorate", "pos": "vt.", "meaning": "裝飾", "strategy": "諧音 (帶扣蕾特)", "mnemonic": "帶上漂亮的扣子和蕾絲，做出特別的裝飾。", "sprite": 1, "pos_idx": 8 },
-            { "id": 10, "word": "meaning", "pos": "n.", "meaning": "含意", "strategy": "諧音 (謎領)", "mnemonic": "解開這道謎題，才能領悟這幅畫真正的含意。", "sprite": 1, "pos_idx": 9 },
-            { "id": 11, "word": "perform", "pos": "v.", "meaning": "表演", "strategy": "諧音 (破風/披風)", "mnemonic": "魔術師揮動披風，衝破強風進行表演。", "sprite": 1, "pos_idx": 10 },
-            { "id": 12, "word": "guest", "pos": "n.", "meaning": "賓客", "strategy": "諧音 (Guess特)", "mnemonic": "讓大家猜猜(Guess)哪一位才是特別邀請的賓客。", "sprite": 1, "pos_idx": 11 },
-            { "id": 13, "word": "encourage", "pos": "vt.", "meaning": "鼓勵", "strategy": "字根 (en-使 + courage-勇氣)", "mnemonic": "給予他勇氣(courage)，就是最好的鼓勵。", "sprite": 1, "pos_idx": 12 },
-            { "id": 14, "word": "grab", "pos": "vt.", "meaning": "抓取", "strategy": "諧音 (哥拉布)", "mnemonic": "哥哥猛力拉著布，牢牢抓取不放手。", "sprite": 1, "pos_idx": 13 },
-            { "id": 15, "word": "custom", "pos": "n.", "meaning": "習俗", "strategy": "諧音 (卡司燈)", "mnemonic": "元宵節的習俗就是要有強大卡司的表演和漂亮的燈籠。", "sprite": 1, "pos_idx": 14 },
-            { "id": 17, "word": "generous", "pos": "adj.", "meaning": "慷慨的", "strategy": "諧音 (這呢肉絲)", "mnemonic": "這碗麵給了這呢尖的肉絲，老闆真是慷慨的。", "sprite": 2, "pos_idx": 0 },
-            { "id": 18, "word": "impress", "pos": "vt.", "meaning": "使留下印象", "strategy": "諧音 (硬壓)", "mnemonic": "用硬物強力壓下去，在紅包上留下深刻印象。", "sprite": 2, "pos_idx": 1 },
-            { "id": 19, "word": "comment", "pos": "n.", "meaning": "留言", "strategy": "諧音 (看麵)", "mnemonic": "賓客看著這碗麵，在筆記本寫下美味的評論與留言。", "sprite": 2, "pos_idx": 2 },
-            { "id": 20, "word": "stool", "pos": "n.", "meaning": "凳子", "strategy": "諧音 (四圖)", "mnemonic": "辦桌常用的圓凳子，椅面上印著四個圓形的圖案。", "sprite": 2, "pos_idx": 3 },
-            { "id": 21, "word": "banquet", "pos": "n.", "meaning": "宴會", "strategy": "諧音 (辦跪特)", "mnemonic": "辦理這場宴會，主辦人跪求特級廚師來掌勺。", "sprite": 2, "pos_idx": 4 },
-            { "id": 22, "word": "tent", "pos": "n.", "meaning": "帳篷", "strategy": "諧音 (天特)", "mnemonic": "在大天空下搭起特大號的辦桌帳篷。", "sprite": 2, "pos_idx": 5 },
-            { "id": 23, "word": "iron", "pos": "n.", "meaning": "鐵", "strategy": "諧音 (愛恩)", "mnemonic": "大家的愛與恩情要像鐵一樣堅固，不生鏽。", "sprite": 2, "pos_idx": 6 },
-            { "id": 24, "word": "firecracker", "pos": "n.", "meaning": "鞭炮", "strategy": "圖像拆解 (Fire+Cracker)", "mnemonic": "把火點在餅乾上，竟然變成了鞭炮爆炸。", "sprite": 2, "pos_idx": 7 },
-            { "id": 25, "word": "platter", "pos": "n.", "meaning": "拼盤", "strategy": "諧音 (鋪雷特)", "mnemonic": "在大拼盤上鋪滿了雷達形狀的特色冷盤。", "sprite": 2, "pos_idx": 8 },
-            { "id": 26, "word": "blessing", "pos": "n.", "meaning": "祝福", "strategy": "諧音 (不累心)", "mnemonic": "給新人的這份祝福，保證讓他們從此生活不累心。", "sprite": 2, "pos_idx": 9 },
-            { "id": 27, "word": "leftovers", "pos": "n.", "meaning": "剩菜", "strategy": "語意拆解 (Left剩下 + Over超過)", "mnemonic": "宴會剩下的菜超過了冰箱容量，就變成剩菜。", "sprite": 2, "pos_idx": 10 },
-            { "id": 28, "word": "taro", "pos": "n.", "meaning": "芋頭", "strategy": "諧音與形狀 (塔肉)", "mnemonic": "辦桌師傅把肉片堆成一座塔，裡面藏著一顆大芋頭。", "sprite": 2, "pos_idx": 11 },
-            { "id": 29, "word": "buffet", "pos": "n.", "meaning": "自助餐", "strategy": "諧音 (飽費)", "mnemonic": "吃自助餐吃到超飽，完全不費力氣。", "sprite": 2, "pos_idx": 12 },
-            { "id": 30, "word": "hospitality", "pos": "n.", "meaning": "好客", "strategy": "字型聯想 (Hospital)", "mnemonic": "這家 Hospital 的醫生最好客，在門口擺桌請大家吃大餐。", "sprite": 2, "pos_idx": 13 },
-            // 修正：a number of 對應 Grid 2 的第 15 格 (pos_idx: 14)
-            { "id": 31, "word": "a number of", "pos": "phrase", "meaning": "一些", "strategy": "圖像法", "mnemonic": "草地上散落著一些彩色的數字。", "sprite": 2, "pos_idx": 14 },
-            // 修正：set off 從 Grid 3 的第 1 格 (pos_idx: 0) 開始
-            { "id": 33, "word": "set off", "pos": "phrase", "meaning": "施放", "strategy": "諧音 (誰喔)", "mnemonic": "誰喔！是誰喔！在辦桌現場施放這麼大串的鞭炮？", "sprite": 3, "pos_idx": 0 },
-            { "id": 34, "word": "in total", "pos": "phrase", "meaning": "總共", "strategy": "諧音 (硬幣投)", "mnemonic": "把所有硬幣都投進存錢筒，算算看總共有多少錢。", "sprite": 3, "pos_idx": 1 },
-            { "id": 35, "word": "all of a sudden", "pos": "phrase", "meaning": "突然地", "strategy": "諧音 (歐阿薩登)", "mnemonic": "歐！一個叫薩登的人突然地出現在我面前。", "sprite": 3, "pos_idx": 2 }
+            { "id": 1, "word": "rural", "pronunciation": "[ˋrᴜrəl]", "pos": "adj.", "meaning": "農村的", "strategy": "諧音 (路肉)", "mnemonic": "在農村的小路上，擺滿了曬乾的豬肉。", "sprite": 1, "pos_idx": 0 },
+            { "id": 2, "word": "plastic", "pronunciation": "[ˋplæstɪk]", "pos": "adj.", "meaning": "塑膠的", "strategy": "諧音 (陪老師踢)", "mnemonic": "同學陪老師踢一個塑膠足球。", "sprite": 1, "pos_idx": 1 },
+            { "id": 3, "word": "discover", "pronunciation": "[dɪˋskʌvɚ]", "pos": "vt.", "meaning": "發現", "strategy": "字根 (dis-不 + cover-蓋住)", "mnemonic": "把蓋子掀開就能發現裡面的寶藏。", "sprite": 1, "pos_idx": 2 },
+            { "id": 4, "word": "stage", "pronunciation": "[stedʒ]", "pos": "n.", "meaning": "舞臺", "strategy": "圖像法", "mnemonic": "聚光燈打在圓形的舞臺中央。", "sprite": 1, "pos_idx": 3 },
+            { "id": 5, "word": "outdoor", "pronunciation": "[ˋaᴜt͵dor]", "pos": "adj.", "meaning": "戶外的", "strategy": "圖像法 (out-門外)", "mnemonic": "踏出那扇門(door)到外面(out)，就是戶外的世界。", "sprite": 1, "pos_idx": 4 },
+            { "id": 6, "word": "chop", "pronunciation": "[tʃɑp]", "pos": "vt.", "meaning": "切，剁", "strategy": "諧音 (恰恰)", "mnemonic": "廚師邊跳恰恰舞，邊用力地切剁排骨。", "sprite": 1, "pos_idx": 5 },
+            { "id": 7, "word": "ingredient", "pronunciation": "[ɪnˋgridɪənt]", "pos": "n.", "meaning": "食材", "strategy": "諧音 (硬給地恩)", "mnemonic": "土地硬是要給大地恩惠，長出各種食材。", "sprite": 1, "pos_idx": 6 },
+            { "id": 8, "word": "deliver", "pronunciation": "[dɪˋlɪvɚ]", "pos": "vt.", "meaning": "遞送", "strategy": "諧音 (地利划)", "mnemonic": "快遞員利用河流地利之便，拼命划船去遞送包裹。", "sprite": 1, "pos_idx": 7 },
+            { "id": 9, "word": "decorate", "pronunciation": "[ˋdɛkə͵ret]", "pos": "vt.", "meaning": "裝飾", "strategy": "諧音 (帶扣蕾特)", "mnemonic": "帶上漂亮的扣子和蕾絲，做出特別的裝飾。", "sprite": 1, "pos_idx": 8 },
+            { "id": 10, "word": "meaning", "pronunciation": "[ˋminɪŋ]", "pos": "n.", "meaning": "含意", "strategy": "諧音 (謎領)", "mnemonic": "解開這道謎題，才能領悟這幅畫真正的含意。", "sprite": 1, "pos_idx": 9 },
+            { "id": 11, "word": "perform", "pronunciation": "[pɚˋfɔrm]", "pos": "v.", "meaning": "表演", "strategy": "諧音 (破風/披風)", "mnemonic": "魔術師揮動披風，衝破強風進行表演。", "sprite": 1, "pos_idx": 10 },
+            { "id": 12, "word": "guest", "pronunciation": "[gɛst]", "pos": "n.", "meaning": "賓客", "strategy": "諧音 (Guess特)", "mnemonic": "讓大家猜猜(Guess)哪一位才是特別邀請的賓客。", "sprite": 1, "pos_idx": 11 },
+            { "id": 13, "word": "encourage", "pronunciation": "[ɪnˋkɝɪdʒ]", "pos": "vt.", "meaning": "鼓勵", "strategy": "字根 (en-使 + courage-勇氣)", "mnemonic": "給予他勇氣(courage)，就是最好的鼓勵。", "sprite": 1, "pos_idx": 12 },
+            { "id": 14, "word": "grab", "pronunciation": "[græb]", "pos": "vt.", "meaning": "抓取", "strategy": "諧音 (哥拉布)", "mnemonic": "哥哥猛力拉著布，牢牢抓取不放手。", "sprite": 1, "pos_idx": 13 },
+            { "id": 15, "word": "custom", "pronunciation": "[`kʌstəm]", "pos": "n.", "meaning": "習俗", "strategy": "諧音 (卡司燈)", "mnemonic": "元宵節的習俗就是要有強大卡司的表演和漂亮的燈籠。", "sprite": 1, "pos_idx": 14 },
+            { "id": 17, "word": "generous", "pronunciation": "[`dʒɛnərəs]", "pos": "adj.", "meaning": "慷慨的", "strategy": "諧音 (這呢肉絲)", "mnemonic": "這碗麵給了這呢尖的肉絲，老闆真是慷慨的。", "sprite": 2, "pos_idx": 0 },
+            { "id": 18, "word": "impress", "pronunciation": "[ɪmˋprɛs]", "pos": "vt.", "meaning": "使留下印象", "strategy": "諧音 (硬壓)", "mnemonic": "用硬物強力壓下去，在紅包上留下深刻印象。", "sprite": 2, "pos_idx": 1 },
+            { "id": 19, "word": "comment", "pronunciation": "[ˋkɑmɛnt]", "pos": "n.", "meaning": "留言", "strategy": "諧音 (看麵)", "mnemonic": "賓客看著這碗麵，在筆記本寫下美味的評論與留言。", "sprite": 2, "pos_idx": 2 },
+            { "id": 20, "word": "stool", "pronunciation": "[stul]", "pos": "n.", "meaning": "凳子", "strategy": "諧音 (四圖)", "mnemonic": "辦桌常用的圓凳子，椅面上印著四個圓形的圖案。", "sprite": 2, "pos_idx": 3 },
+            { "id": 21, "word": "banquet", "pronunciation": "[ˋbæŋkwɪt]", "pos": "n.", "meaning": "宴會", "strategy": "諧音 (辦跪特)", "mnemonic": "辦理這場宴會，主辦人跪求特級廚師來掌勺。", "sprite": 2, "pos_idx": 4 },
+            { "id": 22, "word": "tent", "pronunciation": "[tɛnt]", "pos": "n.", "meaning": "帳篷", "strategy": "諧音 (天特)", "mnemonic": "在大天空下搭起特大號的辦桌帳篷。", "sprite": 2, "pos_idx": 5 },
+            { "id": 23, "word": "iron", "pronunciation": "[ˋaɪɚn]", "pos": "n.", "meaning": "鐵", "strategy": "諧音 (愛恩)", "mnemonic": "大家的愛與恩情要像鐵一樣堅固，不生鏽。", "sprite": 2, "pos_idx": 6 },
+            { "id": 24, "word": "firecracker", "pronunciation": "[ˋfaɪr͵krækɚ]", "pos": "n.", "meaning": "鞭炮", "strategy": "圖像拆解 (Fire+Cracker)", "mnemonic": "把火點在餅乾上，竟然變成了鞭炮爆炸。", "sprite": 2, "pos_idx": 7 },
+            { "id": 25, "word": "platter", "pronunciation": "[ˋplætɚ]", "pos": "n.", "meaning": "拼盤", "strategy": "諧音 (鋪雷特)", "mnemonic": "在大拼盤上鋪滿了雷達形狀的特色冷盤。", "sprite": 2, "pos_idx": 8 },
+            { "id": 26, "word": "blessing", "pronunciation": "[ˋblɛsɪŋ]", "pos": "n.", "meaning": "祝福", "strategy": "諧音 (不累心)", "mnemonic": "給新人的這份祝福，保證讓他們從此生活不累心。", "sprite": 2, "pos_idx": 9 },
+            { "id": 27, "word": "leftovers", "pronunciation": "[ˋlɛft͵ovɚz]", "pos": "n.", "meaning": "剩菜", "strategy": "語意拆解 (Left剩下 + Over超過)", "mnemonic": "宴會剩下的菜超過了冰箱容量，就變成剩菜。", "sprite": 2, "pos_idx": 10 },
+            { "id": 28, "word": "taro", "pronunciation": "[ˋtɑro]", "pos": "n.", "meaning": "芋頭", "strategy": "諧音與形狀 (塔肉)", "mnemonic": "辦桌師傅把肉片堆成一座塔，裡面藏著一顆大芋頭。", "sprite": 2, "pos_idx": 11 },
+            { "id": 30, "word": "buffet", "pronunciation": "[bəˋfeɪ]", "pos": "n.", "meaning": "自助餐", "strategy": "諧音 (飽費)", "mnemonic": "吃自助餐吃到超飽，完全不費力氣。", "sprite": 2, "pos_idx": 12 },
+            { "id": 31, "word": "hospitality", "pronunciation": "[͵hɑspɪˋtælətɪ]", "pos": "n.", "meaning": "好客", "strategy": "字型聯想 (Hospital)", "mnemonic": "這家 Hospital 的醫生最好客，在門口擺桌請大家吃大餐。", "sprite": 2, "pos_idx": 13 },
+            // a number of (一些)：應對應到 Grid 2 的第 15 格 (pos_idx: 14)
+            { "id": 32, "word": "a number of", "pronunciation": "", "pos": "phr.", "meaning": "一些", "strategy": "圖像法", "mnemonic": "草地上散落著一些彩色的數字。", "sprite": 2, "pos_idx": 14 },
+            // set off 從 Grid 3 的第 1 格 (pos_idx: 0) 開始
+            { "id": 33, "word": "set off", "pronunciation": "", "pos": "phr.", "meaning": "施放", "strategy": "諧音 (誰喔)", "mnemonic": "誰喔！是誰喔！在辦桌現場施放這麼大串的鞭炮？", "sprite": 3, "pos_idx": 0 },
+            { "id": 34, "word": "in total", "pronunciation": "", "pos": "phr.", "meaning": "總共", "strategy": "諧音 (硬幣投)", "mnemonic": "把所有硬幣都投進存錢筒，算算看總共有多少錢。", "sprite": 3, "pos_idx": 1 },
+            { "id": 35, "word": "all of a sudden", "pronunciation": "", "pos": "phr.", "meaning": "突然地", "strategy": "諧音 (歐阿薩登)", "mnemonic": "歐！一個叫薩登的人突然地出現在我面前。", "sprite": 3, "pos_idx": 2 }
         ];
 
         const sprites = {
@@ -170,7 +170,7 @@
                         <div class="p-8 flex-grow flex flex-col justify-center items-center">
                             <h2 class="text-4xl font-bold mb-4">${item.word}</h2>
                             <div class="flex items-center gap-6">
-                                <span class="text-xl text-gray-500 italic">[ Phonetic ]</span>
+                                ${item.pronunciation ? `<span class="text-xl text-gray-500 italic">${item.pronunciation}</span>` : ''}
                                 <button class="voice-btn" onclick="event.stopPropagation(); speak('${item.word}')">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                                         <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.983 5.983 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.984 3.984 0 00-1.172-2.828a1 1 0 010-1.415z" clip-rule="evenodd" />
