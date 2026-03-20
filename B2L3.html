@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 B2L3 互動單字記憶卡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #2C3E50;
+            --accent-orange: #E67E22;
+            --bg-light: #F8FAFC;
+        }
+
+        body {
+            font-family: 'Lexend', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--primary-blue);
+        }
+
+        /* 記憶卡翻轉邏輯 */
+        .card-container {
+            perspective: 1000px;
+            height: 520px; /* 稍微增加高度以容納更大的字體 */
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+            background: white;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            border: 3px solid var(--primary-blue);
+            justify-content: center; /* 垂直向中間集中 */
+            align-items: center;
+        }
+
+        /* 影像處理：無框化溢位裁切 (Border-Free Clipping) */
+        .sprite-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            overflow: hidden;
+            background-color: #eee;
+        }
+
+        .sprite-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: 406%; /* 放大 6% 以消除格線 */
+            background-repeat: no-repeat;
+            transition: transform 0.3s ease;
+        }
+
+        .vocab-grid {
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: repeat(1, 1fr);
+        }
+        @media (min-width: 768px) {
+            .vocab-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .mnemonic-box {
+            background-color: var(--accent-orange);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            font-weight: 600;
+            width: 90%;
+            box-shadow: 0 4px 6px rgba(230, 126, 34, 0.3);
+        }
+
+        .header-gradient {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #34495E 100%);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <header class="header-gradient text-white p-8 rounded-3xl mb-12 text-center shadow-lg">
+        <h1 class="text-3xl md:text-4xl font-bold mb-2">🧠 B2L3 互動單字記憶卡</h1>
+        <p class="opacity-80 font-medium">版面優化：字體放大 & 垂直置中模式</p>
+    </header>
+
+    <main id="app" class="max-w-6xl mx-auto vocab-grid">
+        <!-- 卡片將由 JS 生成 -->
+    </main>
+
+    <script>
+        const vocabData = [
+            // Grid 1
+            { "grid": 1, "pos": 0, "word": "reality", "pron": "[rɪˋælətɪ]", "pos_tag": "n.", "meaning": "現實", "strategy": "圖像記憶", "mnemonic": "Real (真的) 加上 -ity (尾巴)，就是不加濾鏡的現實。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 1, "word": "add", "pron": "[æd]", "pos_tag": "v.", "meaning": "加；增加", "strategy": "圖像記憶", "mnemonic": "在影片中加入很多 Add (廣告)，點閱率就會增加。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 2, "word": "effects", "pron": "[ɪˋfɛkts]", "pos_tag": "n.", "meaning": "特效；效果", "strategy": "諧音記憶 (一飛特)", "mnemonic": "穿上這雙鞋，一飛特別高，這就是電影特效的效果。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 3, "word": "appearance", "pron": "[əˋpɪrəns]", "pos_tag": "n.", "meaning": "外表", "strategy": "字根拆解 (appear)", "mnemonic": "一出現(appear)就要亮麗，因為大家很看重外表。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 4, "word": "involved", "pron": "[ɪnˋvɑlvd]", "pos_tag": "adj.", "meaning": "參與的；有關的", "strategy": "字根拆解 (in+volv)", "mnemonic": "把自己捲入(volv)進去(in)，就是深入參與。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 5, "word": "scary", "pron": "[ˋskɛrɪ]", "pos_tag": "adj.", "meaning": "可怕的", "strategy": "諧音記憶 (死給力)", "mnemonic": "這隻鬼嚇人死給力(非常用力)，真的超可怕的。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 6, "word": "wild", "pron": "[waɪld]", "pos_tag": "n./adj.", "meaning": "荒野/野生的", "strategy": "諧音記憶 (歪的)", "mnemonic": "荒野裡的野生樹木，長得東倒西歪的。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 7, "word": "information", "pron": "[͵ɪnfɚˋmeʃən]", "pos_tag": "n.", "meaning": "資訊", "strategy": "圖像記憶 (In+Form)", "mnemonic": "把資訊放入(In)表格(Form)裡，方便大家讀。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 8, "word": "scene", "pron": "[sin]", "pos_tag": "n.", "meaning": "場景", "strategy": "諧音記憶 (心)", "mnemonic": "這個電影場景，美到讓人動心。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 9, "word": "image", "pron": "[ˋɪmɪdʒ]", "pos_tag": "n.", "meaning": "影像；圖像", "strategy": "諧音記憶 (一美肌)", "mnemonic": "這張影像開了一美肌模式，圖像變得很漂亮。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 10, "word": "extra", "pron": "[ˋɛkstrə]", "pos_tag": "adj.", "meaning": "額外的", "strategy": "諧音記憶 (艾克斯抓)", "mnemonic": "艾克斯(X)伸手一抓，又抓到一根額外的棒棒糖。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 11, "word": "curious", "pron": "[ˋkjᴜrɪəs]", "pos_tag": "adj.", "meaning": "好奇的", "strategy": "字根拆解 (cur)", "mnemonic": "心裡有股力量在奔跑(cur)，驅使人去好奇探索。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 12, "word": "explore", "pron": "[ɪkˋsplor]", "pos_tag": "v.", "meaning": "探索", "strategy": "字根拆解 (ex+plore)", "mnemonic": "朝向外(ex)面大聲喊(plore)，在森林裡探索出路。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 13, "word": "develop", "pron": "[dɪˋvɛləp]", "pos_tag": "v.", "meaning": "發展；成長", "strategy": "圖像記憶 (De+velop)", "mnemonic": "去除(de)掉外面的包裹(velop)，讓幼苗自由發展。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            { "grid": 1, "pos": 14, "word": "augmented", "pron": "[ɔgˋmɛntɪd]", "pos_tag": "adj.", "meaning": "擴增的", "strategy": "諧音記憶 (阿公門踢)", "mnemonic": "阿公對著虛擬的門踢一腳，結果擴增出更多金幣。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G1.jpg" },
+            
+            // Grid 2
+            { "grid": 2, "pos": 0, "word": "virtual", "pron": "[ˋvɝtʃᴜəl]", "pos_tag": "adj.", "meaning": "虛擬的", "strategy": "諧音記憶 (Virus)", "mnemonic": "虛擬世界的人全(tual)都不怕病毒(vir-)。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 1, "word": "digital", "pron": "[ˋdɪdʒɪtḷ]", "pos_tag": "adj.", "meaning": "數位的", "strategy": "諧音記憶 (弟子偷)", "mnemonic": "這弟子偷走了師父的數位平板電腦。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 2, "word": "mirror", "pron": "[ˋmɪrɚ]", "pos_tag": "n.", "meaning": "鏡子", "strategy": "諧音記憶 (迷路)", "mnemonic": "在鏡子迷宮裡，每個人都會迷路。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 3, "word": "outer space", "pron": "[͵aᴜtɚ ˋspes]", "pos_tag": "n.", "meaning": "外太空", "strategy": "圖像記憶", "mnemonic": "離開地球到外面的空間，就是外太空。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 4, "word": "headset", "pron": "[ˋhɛd͵sɛt]", "pos_tag": "n.", "meaning": "頭戴裝置", "strategy": "圖像記憶", "mnemonic": "在頭上裝一套設備，就是頭戴裝置。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 5, "word": "on the other hand", "pron": "", "pos_tag": "phr.", "meaning": "另一方面", "strategy": "圖像記憶", "mnemonic": "這隻手拿蘋果，另一方面 (另一隻手) 拿橘子。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 6, "word": "as for", "pron": "", "pos_tag": "phr.", "meaning": "至於", "strategy": "諧音記憶 (愛死火)", "mnemonic": "愛死(As)火(for)鍋，至於甜點，我完全沒興趣。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 7, "word": "try on", "pron": "", "pos_tag": "phr.", "meaning": "試穿", "strategy": "圖像記憶", "mnemonic": "試著把衣服穿上身，這就是試穿。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 8, "word": "for instance", "pron": "", "pos_tag": "phr.", "meaning": "例如", "strategy": "諧音記憶 (佛印寺等)", "mnemonic": "例如 (for instance)，我們約在 佛印寺 頭 等 我。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" },
+            { "grid": 2, "pos": 9, "word": "give...a try", "pron": "", "pos_tag": "phr.", "meaning": "試試看", "strategy": "圖像記憶", "mnemonic": "給自己一個試試看的機會。", "img": "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L3G2.jpg" }
+        ];
+
+        function speak(text) {
+            if (!text) return;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.85;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function getSpritePosition(pos) {
+            const row = Math.floor(pos / 4);
+            const col = pos % 4;
+            // 精確計算 4x4 座標
+            const x = (col * 33.3333).toFixed(4);
+            const y = (row * 33.3333).toFixed(4);
+            return `${x}% ${y}%`;
+        }
+
+        const app = document.getElementById('app');
+
+        vocabData.forEach((item, index) => {
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'card-container';
+
+            const spritePos = getSpritePosition(item.pos);
+
+            cardContainer.innerHTML = `
+                <div class="card-inner" id="card-${index}">
+                    <!-- 正面 -->
+                    <div class="card-face card-front">
+                        <div class="sprite-container">
+                            <div class="sprite-img" style="background-image: url('${item.img}'); background-position: ${spritePos};"></div>
+                        </div>
+                        <div class="p-6 flex flex-col items-center justify-center flex-grow text-center">
+                            <h2 class="text-4xl font-bold mb-2 tracking-tight">${item.word}</h2>
+                            <div class="flex items-center gap-3">
+                                <span class="text-slate-500 font-medium text-lg">${item.pron}</span>
+                                <button class="btn-pronounce text-slate-400 hover:text-[var(--accent-orange)]" onclick="event.stopPropagation(); speak('${item.word}')">
+                                    <i class="fas fa-volume-up text-2xl"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 反面：優化後的版面 -->
+                    <div class="card-face card-back p-10 text-center">
+                        <div class="mb-6">
+                            <h2 class="text-4xl font-extrabold text-[var(--primary-blue)] mb-2">${item.word}</h2>
+                            <span class="inline-block px-4 py-1 bg-slate-100 rounded-full text-base font-bold text-slate-600">${item.pos_tag}</span>
+                        </div>
+                        
+                        <div class="text-3xl font-bold text-slate-800 mb-8">
+                            ${item.meaning}
+                        </div>
+
+                        <div class="w-full mb-8">
+                            <div class="flex items-center justify-center gap-2 text-lg text-slate-600">
+                                <span class="text-blue-500">💡</span>
+                                <span class="font-bold">策略：</span>
+                                <span>${item.strategy}</span>
+                            </div>
+                        </div>
+
+                        <div class="mnemonic-box">
+                            <div class="text-xs opacity-90 mb-2 uppercase tracking-[0.2em] font-bold">Memory Mnemonic</div>
+                            <p class="text-xl leading-relaxed">${item.mnemonic}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const cardInner = cardContainer.querySelector('.card-inner');
+            cardInner.addEventListener('click', () => {
+                cardInner.classList.toggle('is-flipped');
+                if (cardInner.classList.contains('is-flipped')) {
+                    setTimeout(() => speak(item.word), 300);
+                }
+            });
+
+            app.appendChild(cardContainer);
+        });
+    </script>
+</body>
+</html>
