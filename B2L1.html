@@ -1,203 +1,374 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🧠 B2L1 互動單字記憶卡</title>
-    <style>
-        :root {
-            --primary: #2C3E50;
-            --accent: #E67E22;
-            --bg: #F4F7F6;
-            --white: #FFFFFF;
-        }
+import React, { useState } from 'react';
+import { Volume2, Lightbulb } from 'lucide-react';
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+const vocabularyData = [
+  { 
+    en: "attraction", 
+    ph: "[əˋtrækʃən]", 
+    cn: "有吸引力的景點、事物", 
+    ex: "Jiufen is a very popular tourist attraction in Taiwan.", 
+    grid: 1, 
+    pos: 0,
+    strategy: "諧音 (台語/國語)",
+    mnemonic: "阿！扯(A-trac)到一頭金牛來吸引遊客。",
+    pos_type: "n."
+  },
+  { 
+    en: "local", 
+    ph: "[ˋlokḷ]", 
+    cn: "當地的 / 當地人", 
+    ex: "Our hotel is close to the local beach. / Many of the locals were sleeping.", 
+    grid: 1, 
+    pos: 1,
+    strategy: "諧音 (台語)",
+    mnemonic: "當地的阿伯「摟扣」在乘涼。",
+    pos_type: "adj. / n."
+  },
+  { 
+    en: "plain", 
+    ph: "[plen]", 
+    cn: "樸素的", 
+    ex: "Lady Gaga wore a plain dress to the party.", 
+    grid: 1, 
+    pos: 2,
+    strategy: "聯想",
+    mnemonic: "這件衣服像「平」原 (Plain) 一樣樸素。",
+    pos_type: "adj."
+  },
+  { 
+    en: "counter", 
+    ph: "[ˋkaᴜntɚ]", 
+    cn: "櫃臺", 
+    ex: "People are waiting in front of the counter to get a free gift.", 
+    grid: 1, 
+    pos: 3,
+    strategy: "諧音 (國語)",
+    mnemonic: "在櫃檯「看她」結帳。",
+    pos_type: "n."
+  },
+  { 
+    en: "hug", 
+    ph: "[hʌg]", 
+    cn: "擁抱", 
+    ex: "The couple hug each other every time they meet.", 
+    grid: 1, 
+    pos: 4,
+    strategy: "諧音 (國語)",
+    mnemonic: "「哈哥」在給哈利波特一個大擁抱。",
+    pos_type: "vt."
+  },
+  { 
+    en: "pleased", 
+    ph: "[plizd]", 
+    cn: "高興的，滿意的", 
+    ex: "Ann was not pleased with her fries at the restaurant.", 
+    grid: 1, 
+    pos: 5,
+    strategy: "諧音 (國語)",
+    mnemonic: "拿到「普里茲」獎好高興。",
+    pos_type: "adj."
+  },
+  { 
+    en: "mood", 
+    ph: "[mud]", 
+    cn: "心情，情緒", 
+    ex: "Justin is in a good mood because the long weekend is coming.", 
+    grid: 1, 
+    pos: 6,
+    strategy: "諧音 (國語)",
+    mnemonic: "心情好就去「牧」場看牛。",
+    pos_type: "n."
+  },
+  { 
+    en: "unfairly", 
+    ph: "[ʌnˋfɛrlɪ]", 
+    cn: "不公平地", 
+    ex: "Daniel is angry about being treated unfairly by his boss.", 
+    grid: 1, 
+    pos: 7,
+    strategy: "諧音 (國語)",
+    mnemonic: "這「案非常」不公平，天秤歪掉了。",
+    pos_type: "adv."
+  },
+  { 
+    en: "observe", 
+    ph: "[əbˋzɝv]", 
+    cn: "觀察", 
+    ex: "He started to observe the people in the store.", 
+    grid: 1, 
+    pos: 8,
+    strategy: "諧音 (國語)",
+    mnemonic: "阿伯樂在觀察美麗的蝴蝶。",
+    pos_type: "vi.; vt."
+  },
+  { 
+    en: "customer", 
+    ph: "[ˋkʌstəmɚ]", 
+    cn: "顧客", 
+    ex: "The shop serves customers till 5 p.m. every day.", 
+    grid: 1, 
+    pos: 9,
+    strategy: "諧音 (國語)",
+    mnemonic: "顧客太多，百貨門口「卡死他媽」了。",
+    pos_type: "n."
+  },
+  { 
+    en: "seem", 
+    ph: "[sim]", 
+    cn: "好像，似乎", 
+    ex: "Larry seems to have a new girlfriend.", 
+    grid: 1, 
+    pos: 10,
+    strategy: "諧音 (國語)",
+    mnemonic: "這「西」瓜看起來好像是真的，其實是蛋糕。",
+    pos_type: "linking v."
+  },
+  { 
+    en: "reveal", 
+    ph: "[rɪˋvil]", 
+    cn: "揭露，透露", 
+    ex: "The news reveals that the convenience store will hold a special event.", 
+    grid: 1, 
+    pos: 11,
+    strategy: "字根拆解",
+    mnemonic: "除去(re-) 面紗(veil)，真相被揭露。",
+    pos_type: "vt."
+  },
+  { 
+    en: "secret", 
+    ph: "[ˋsikrɪt]", 
+    cn: "祕密 / 祕密的", 
+    ex: "Helen is good at keeping secrets. / They found a secret gate.", 
+    grid: 1, 
+    pos: 12,
+    strategy: "諧音 (台語)",
+    mnemonic: "守住這個秘密守得很「水氣」。",
+    pos_type: "n. / adj."
+  },
+  { 
+    en: "amazed", 
+    ph: "[əˋmezd]", 
+    cn: "感到驚奇的", 
+    ex: "I am really amazed by its new trick.", 
+    grid: 1, 
+    pos: 13,
+    strategy: "諧音 (國語)",
+    mnemonic: "看到「阿妹」唱歌，大家驚奇得掉下巴。",
+    pos_type: "adj."
+  },
+  { 
+    en: "earn", 
+    ph: "[ɝn]", 
+    cn: "贏得，賺 (錢)", 
+    ex: "This earns him many friends.", 
+    grid: 1, 
+    pos: 14,
+    strategy: "諧音 (國語)",
+    mnemonic: "用力「恩」的一聲，賺到金幣。",
+    pos_type: "vt."
+  },
+  { 
+    en: "café", 
+    ph: "[kəˋfe]", 
+    cn: "咖啡店", 
+    ex: "Let's meet at the café near the station.", 
+    grid: 1, 
+    pos: 15,
+    strategy: "諧音 (國語)",
+    mnemonic: "在「咖啡」店喝咖啡。",
+    pos_type: "n."
+  },
+  { 
+    en: "euro", 
+    ph: "[ˋjᴜro]", 
+    cn: "歐元", 
+    ex: "The coffee costs three euros.", 
+    grid: 2, 
+    pos: 0,
+    strategy: "諧音 (國語)",
+    mnemonic: "「有肉」吃就要用歐元買。",
+    pos_type: "n."
+  },
+  { 
+    en: "nationality", 
+    ph: "[͵næʃəˋnælətɪ]", 
+    cn: "國籍", 
+    ex: "What is your nationality?", 
+    grid: 2, 
+    pos: 1,
+    strategy: "諧音 (國語)",
+    mnemonic: "「奶昔拿去」給不同國籍的人喝。",
+    pos_type: "n."
+  },
+  { 
+    en: "pay off", 
+    ph: "[pe ɔf]", 
+    cn: "得到好結果", 
+    ex: "Eva’s efforts to improve her grades finally paid off.", 
+    grid: 2, 
+    pos: 2,
+    strategy: "諧音 (國語)",
+    mnemonic: "努力「賠」到「光」，最後卻贏到翻倍。",
+    pos_type: "phr."
+  },
+  { 
+    en: "right away", 
+    ph: "[raɪt əˋwe]", 
+    cn: "立刻，馬上", 
+    ex: "When the actor appeared, his fans ran to him right away.", 
+    grid: 2, 
+    pos: 3,
+    strategy: "諧音 (國語)",
+    mnemonic: "「萊特」兄弟「阿威」立刻起飛。",
+    pos_type: "phr."
+  },
+  { 
+    en: "stand out", 
+    ph: "[stænd aʊt]", 
+    cn: "突出，出眾", 
+    ex: "The silver one stands out because it has the best camera.", 
+    grid: 2, 
+    pos: 4,
+    strategy: "諧音 (國語)",
+    mnemonic: "「死站在外面」的人最突出。",
+    pos_type: "phr."
+  },
+  { 
+    en: "burst out", 
+    ph: "[bɝst aʊt]", 
+    cn: "突然……", 
+    ex: "The boy burst out laughing on the MRT.", 
+    grid: 2, 
+    pos: 5,
+    strategy: "諧音 (國語)",
+    mnemonic: "「巴士」撞「掉」牆壁，突然衝出來。",
+    pos_type: "phr."
+  },
+  { 
+    en: "have nothing to do with", 
+    ph: "[hæv ˋnʌθɪŋ tə du wɪð]", 
+    cn: "與……無關", 
+    ex: "His job has nothing to do with that.", 
+    grid: 2, 
+    pos: 6,
+    strategy: "諧音 (國語)",
+    mnemonic: "這裡「拿不到」任何東西，與我關。",
+    pos_type: "phr."
+  }
+];
 
-        body {
-            background-color: var(--bg);
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+const Flashcard = ({ item }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
 
-        /* 修正手機標題換行 */
-        h1 {
-            color: var(--primary);
-            margin: 20px 0;
-            font-size: clamp(1.2rem, 5vw, 2rem);
-            text-align: center;
-            width: 100%;
-            white-space: nowrap;
-        }
+  const speak = (e) => {
+    e.stopPropagation();
+    const utterance = new SpeechSynthesisUtterance(item.en);
+    utterance.lang = 'en-US';
+    window.speechSynthesis.speak(utterance);
+  };
 
-        .vocab-grid {
-            display: grid;
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-            grid-template-columns: repeat(2, 1fr);
-        }
+  const gridUrl = item.grid === 1 
+    ? "https://github.com/terenceylhc/vocB2/blob/main/B2L1G1.jpg?raw=true" 
+    : "https://github.com/terenceylhc/vocB2/blob/main/B2L1G2.jpg?raw=true";
 
-        @media (max-width: 768px) {
-            .vocab-grid { grid-template-columns: 1fr; }
-        }
+  // 基於 0 索引的座標計算 (440% 裁切)
+  const x = (item.pos % 4) * (100 / 3);
+  const y = Math.floor(item.pos / 4) * (100 / 3);
 
-        .card { height: 400px; perspective: 1000px; cursor: pointer; }
-
-        .card-inner {
-            position: relative;
-            width: 100%; height: 100%;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-            border-radius: 15px;
-        }
-
-        .card.is-flipped .card-inner { transform: rotateY(180deg); }
-
-        .card-front, .card-back {
-            position: absolute;
-            width: 100%; height: 100%;
-            backface-visibility: hidden;
-            border-radius: 15px;
-            background: var(--white);
-            overflow: hidden;
-            display: flex; flex-direction: column;
-        }
-
-        .card-back {
-            transform: rotateY(180deg);
-            padding: 20px;
-            justify-content: center;
-            border: 2px solid var(--primary);
-        }
-
-        /* 影像區域 (使用直接連結優化載入) */
-        .sprite-img {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background-repeat: no-repeat;
-            background-size: 400% 400%;
-            background-color: #eee;
-        }
-
-        .front-content { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px; }
+  return (
+    <div 
+      className="group perspective-1000 cursor-pointer h-auto"
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <div className={`relative transition-transform duration-500 transform-style-3d ${isFlipped ? 'rotate-y-180' : ''}`}>
         
-        .word-header { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
-        .word-text { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+        {/* 正面 */}
+        <div className="bg-white rounded-[20px] shadow-lg overflow-hidden backface-hidden flex flex-col h-full border-0">
+          <div className="w-full aspect-video overflow-hidden">
+            <div 
+              className="w-full h-full bg-no-repeat transition-transform duration-300"
+              style={{
+                backgroundImage: `url(${gridUrl})`,
+                backgroundSize: '440%', 
+                backgroundPosition: `${x}% ${y}%`,
+                transform: 'scale(1.08)', 
+              }}
+            />
+          </div>
+          <div className="p-8 text-center flex-grow flex flex-col justify-center items-center">
+            <h2 className="text-4xl font-extrabold text-[#2c3e50] mb-3">{item.en}</h2>
+            <div className="flex items-center gap-4 text-gray-500">
+              <span className="text-xl font-mono bg-gray-100 px-3 py-1 rounded-md">{item.ph}</span>
+              <button onClick={speak} className="p-2 hover:bg-blue-50 rounded-full transition-colors">
+                <Volume2 className="w-7 h-7 text-blue-500" />
+              </button>
+            </div>
+          </div>
+        </div>
 
-        .btn-audio {
-            background: var(--primary); color: white; border: none;
-            width: 32px; height: 32px; border-radius: 50%;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-
-        .phonetic { font-size: 1rem; color: #7F8C8D; }
-
-        .back-title { font-size: 2rem; font-weight: 800; color: var(--primary); text-align: center; }
-        .back-pos { font-style: italic; color: #95A5A6; text-align: center; margin-bottom: 10px; }
-        .back-mean { font-size: 1.4rem; font-weight: bold; text-align: center; margin-bottom: 15px; }
-        
-        .back-strategy-box { background: #F8F9F9; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9rem; }
-        .mnemonic-box { 
-            background: #FEF5ED; padding: 12px; border-radius: 10px; 
-            border-left: 5px solid var(--accent); color: var(--accent);
-            font-weight: bold; font-size: 1.1rem;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>🧠 B2L1 互動單字記憶卡</h1>
-    <div class="vocab-grid" id="mainGrid"></div>
-
-    <script>
-        // 1. 更穩定的圖片網址格式 (使用 raw.githubusercontent.com)
-        const imgUrls = [
-            "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L1G1.jpg",
-            "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L1G2.jpg"
-        ];
-
-        // 2. 原始單字資料 (已按照順序排列)
-        const vocabData = [
-            { en: "attraction", ph: "[əˋtrækʃən]", cn: "有吸引力的景點", grid: 1, pos: 1, strategy: "諧音 (台語/國語)", mnemonic: "阿！扯(A-trac)到一頭金牛來吸引遊客。", pos_tag: "n." },
-            { en: "local", ph: "[ˋlokḷ]", cn: "當地的/當地人", grid: 1, pos: 2, strategy: "諧音 (台語)", mnemonic: "當地的阿伯「摟扣」(Lō-khò) 在乘涼。", pos_tag: "adj./n." },
-            { en: "plain", ph: "[plen]", cn: "樸素的", grid: 1, pos: 3, strategy: "聯想", mnemonic: "這件衣服像「平」原 (Plain) 一樣樸素。", pos_tag: "adj." },
-            { en: "counter", ph: "[ˋkaᴜntɚ]", cn: "櫃臺", grid: 1, pos: 4, strategy: "諧音 (國語)", mnemonic: "在櫃檯「看她」(Kàn tā) 結帳。", pos_tag: "n." },
-            { en: "hug", ph: "[hʌg]", cn: "擁抱", grid: 1, pos: 5, strategy: "諧音 (國語)", mnemonic: "「哈哥」(Hagrid) 在給哈利波特一個大擁抱。", pos_tag: "vt./n." },
-            { en: "pleased", ph: "[plizd]", cn: "高興的", grid: 1, pos: 6, strategy: "諧音 (國語)", mnemonic: "拿到「普里茲」(Pritz) 獎好高興。", pos_tag: "adj." },
-            { en: "mood", ph: "[mud]", cn: "心情", grid: 1, pos: 7, strategy: "諧音 (國語)", mnemonic: "心情好就去「牧」(Mood) 場看牛。", pos_tag: "n." },
-            { en: "unfairly", ph: "[ʌnˋfɛrlɪ]", cn: "不公平地", grid: 1, pos: 8, strategy: "諧音 (國語)", mnemonic: "這「案非常」(Un-fair) 不公平，天秤歪掉了。", pos_tag: "adv." },
-            { en: "observe", ph: "[əbˋzɝv]", cn: "觀察", grid: 1, pos: 9, strategy: "諧音 (國語)", mnemonic: "阿伯樂在觀察美麗的蝴蝶。", pos_tag: "vt." },
-            { en: "customer", ph: "[ˋkʌstəmɚ]", cn: "顧客", grid: 1, pos: 10, strategy: "諧音 (國語)", mnemonic: "顧客太多，百貨門口「卡死他媽」了。", pos_tag: "n." },
-            { en: "seem", ph: "[sim]", cn: "好像/似乎", grid: 1, pos: 11, strategy: "諧音 (國語)", mnemonic: "這「西」(See-m) 瓜看起來好像是真的，其實是蛋糕。", pos_tag: "vi." },
-            { en: "reveal", ph: "[rɪˋvil]", cn: "揭露/透露", grid: 1, pos: 12, strategy: "字根拆解", mnemonic: "除去(re-) 面紗(veil)，真相被揭露。", pos_tag: "vt." },
-            { en: "secret", ph: "[ˋsikrɪt]", cn: "秘密", grid: 1, pos: 13, strategy: "諧音 (台語)", mnemonic: "守住這個秘密守得很「水氣」(suí-khì)。", pos_tag: "n./adj." },
-            { en: "amazed", ph: "[əˋmezd]", cn: "感到驚奇的", grid: 1, pos: 14, strategy: "諧音 (國語)", mnemonic: "看到「阿妹」(A-Mei) 唱歌，大家驚奇得掉下巴。", pos_tag: "adj." },
-            { en: "earn", ph: "[ɝn]", cn: "賺得", grid: 1, pos: 15, strategy: "諧音 (國語)", mnemonic: "用力「恩」(Earn) 的一聲，賺到金幣。", pos_tag: "vt." },
-            { en: "café", ph: "[kəˋfe]", cn: "咖啡店", grid: 1, pos: 16, strategy: "諧音 (國語)", mnemonic: "在「咖啡」店喝咖啡。", pos_tag: "n." },
-            { en: "euro", ph: "[ˋjᴜro]", cn: "歐元", grid: 2, pos: 1, strategy: "諧音 (國語)", mnemonic: "「有肉」(eu-ro) 吃就要用歐元買。", pos_tag: "n." },
-            { en: "nationality", ph: "[͵næʃəˋnælətɪ]", cn: "國籍", grid: 2, pos: 2, strategy: "諧音 (國語)", mnemonic: "「奶昔拿去」(na-tion-ali-ty) 給不同國籍的人喝。", pos_tag: "n." },
-            { en: "pay off", ph: "[pe ɔf]", cn: "得到好結果", grid: 2, pos: 3, strategy: "諧音 (國語)", mnemonic: "努力「賠」(pay) 到「光」(off)，最後卻贏到翻倍。", pos_tag: "phr." },
-            { en: "right away", ph: "[raɪt əˋwe]", cn: "立刻/馬上", grid: 2, pos: 4, strategy: "諧音 (國語)", mnemonic: "「萊特」(right) 兄弟「阿威」(away) 立刻起飛。", pos_tag: "phr." },
-            { en: "stand out", ph: "[stænd aʊt]", cn: "突出/出眾", grid: 2, pos: 5, strategy: "諧音 (國語)", mnemonic: "「死站在外面」(stand out) 的人最突出。", pos_tag: "phr." },
-            { en: "burst out", ph: "[bɝst aʊt]", cn: "突然...", grid: 2, pos: 6, strategy: "諧音 (國語)", mnemonic: "「巴士」(burst) 撞「掉」(out) 牆壁，突然衝出來。", pos_tag: "phr." },
-            { en: "have nothing to do with", ph: "[hæv ˋnʌθɪŋ tə du wɪð]", cn: "與...無關", grid: 2, pos: 7, strategy: "諧音 (國語)", mnemonic: "這裡「拿不到」(nothing to do) 東西，與我無關。", pos_tag: "phr." }
-        ];
-
-        function speak(text) {
-            if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'en-US';
-            window.speechSynthesis.speak(msg);
-        }
-
-        const gridContainer = document.getElementById('mainGrid');
-
-        // 直接遍歷 vocabData (取消隨機)
-        vocabData.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
+        {/* 反面 - 視覺強化佈局 */}
+        <div className="absolute inset-0 bg-white rounded-[20px] shadow-lg overflow-hidden backface-hidden rotate-y-180 flex flex-col border-0">
+          <div className="p-8 flex flex-col h-full">
             
-            const col = (item.pos - 1) % 4;
-            const row = Math.floor((item.pos - 1) / 4);
-            const xOffset = (col / 3) * 100;
-            const yOffset = (row / 3) * 100;
-            const targetImg = imgUrls[item.grid - 1];
-
-            card.innerHTML = `
-                <div class="card-inner">
-                    <div class="card-front">
-                        <div class="sprite-img" style="background-image: url('${targetImg}'); background-position: ${xOffset}% ${yOffset}%;"></div>
-                        <div class="front-content">
-                            <div class="word-header">
-                                <span class="word-text">${item.en}</span>
-                                <button class="btn-audio" onclick="event.stopPropagation(); speak('${item.en}')">🔊</button>
-                            </div>
-                            <div class="phonetic">${item.ph}</div>
-                        </div>
-                    </div>
-                    <div class="card-back">
-                        <div class="back-title">${item.en}</div>
-                        <div class="back-pos">${item.pos_tag}</div>
-                        <div class="back-mean">${item.cn}</div>
-                        <div class="back-strategy-box"><strong>💡 策略：</strong>${item.strategy}</div>
-                        <div class="mnemonic-box">${item.mnemonic}</div>
-                    </div>
+            {/* 上半部：核心內容置中極大化 */}
+            <div className="flex flex-col items-center justify-center text-center mb-8 pt-6">
+              <h2 className="text-5xl font-black text-[#2c3e50] mb-4 tracking-tight">{item.en}</h2>
+              <div className="flex items-baseline gap-2 justify-center">
+                <span className="text-xl font-bold text-blue-400 italic">{item.pos_type}</span>
+                <p className="text-3xl text-blue-600 font-bold">{item.cn}</p>
+              </div>
+            </div>
+            
+            {/* 中間部：學習策略與口訣 */}
+            <div className="flex-grow space-y-6">
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 px-4 py-1 bg-yellow-100 rounded-full mb-2">
+                  <Lightbulb className="w-4 h-4 text-yellow-600" />
+                  <span className="text-sm font-black text-yellow-700 uppercase tracking-widest">記憶策略</span>
                 </div>
-            `;
+                <p className="text-[#2c3e50] text-xl font-bold">{item.strategy}</p>
+              </div>
+              
+              <div className="bg-orange-500 text-white p-6 rounded-2xl shadow-md transform rotate-[-0.5deg]">
+                <p className="font-bold text-xl leading-relaxed text-center">{item.mnemonic}</p>
+              </div>
+            </div>
 
-            card.onclick = () => {
-                const flipped = card.classList.toggle('is-flipped');
-                if (flipped) setTimeout(() => speak(item.en), 100);
-            };
-            gridContainer.appendChild(card);
-        });
-    </script>
-</body>
-</html>
+            {/* 下半部：例句 */}
+            <div className="mt-8 pt-4 border-t border-gray-100">
+              <p className="text-gray-500 italic leading-snug text-base text-center">{item.ex}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-gray-50 py-12 px-4 md:px-8">
+      <header className="max-w-6xl mx-auto mb-16 text-center">
+        <h1 className="text-5xl font-black text-[#2c3e50] mb-4 tracking-tighter">B2L1 黃金比例單字卡</h1>
+        <div className="h-1.5 w-24 bg-blue-500 mx-auto rounded-full mb-6"></div>
+        <p className="text-gray-500 font-medium italic">整合詞性版本 | 440% 加強型裁切</p>
+      </header>
+      
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
+        {vocabularyData.map((word, index) => (
+          <Flashcard key={index} item={word} />
+        ))}
+      </div>
+
+      <style>
+        {`
+          .perspective-1000 { perspective: 1000px; }
+          .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+          .transform-style-3d { transform-style: preserve-3d; }
+          .rotate-y-180 { transform: rotateY(180deg); }
+        `}
+      </style>
+    </div>
+  );
+}
