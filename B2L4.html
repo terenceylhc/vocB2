@@ -1,134 +1,333 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在大改造中 | 敬請期待</title>
-    <!-- 引入 Tailwind CSS 用於快速佈局 -->
+    <title>🧠 B2L4 互動單字記憶卡</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide 圖示庫 -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob {
-            animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-            animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-            animation-delay: 4s;
-        }
-        
-        body {
-            background-color: #F0F7FF;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
+        :root {
+            --primary-dark: #0f172a;
+            --text-gray: #64748b;
+            --accent-orange: #ff9800;
+            --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+            --bg-light: #f8fafc;
         }
 
-        .social-icon {
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--primary-dark);
+            padding: 2rem 1rem;
+        }
+
+        .vocab-grid {
+            display: grid;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 響應式欄位：電腦版 2 欄，手機版 1 欄 */
+        @media (min-width: 768px) {
+            .vocab-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* 卡片容器 */
+        .card {
+            perspective: 1000px;
+            cursor: pointer;
+            height: auto;
+            min-height: 450px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: white;
+            border-radius: 28px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            padding: 2rem;
+            justify-content: center;
+            position: relative;
+            height: auto;
+            min-height: 100%;
+        }
+
+        /* 影像處理：406% 溢位裁切 */
+        .image-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: #eee;
+            position: relative;
+        }
+
+        .sprite-img {
+            width: 100%;
+            height: 100%;
+            background-size: 406%; /* 徹底無框技術：精確比例裁切 */
+            background-repeat: no-repeat;
+            transform: scale(1.02); /* 微調確保不露邊 */
+        }
+
+        /* 前面文字區 */
+        .front-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .word-title-front {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .phonetic-row {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 後面內容區 */
+        .word-title-back {
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .meaning-row {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 3rem;
-            height: 3rem;
-            background-color: white;
-            color: #94a3b8;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
         }
 
-        .social-icon:hover {
+        .pos-tag {
+            font-size: 1.1rem;
+            background-color: #e2e8f0;
+            padding: 0.2rem 0.8rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .chinese-mean {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .strategy-tip {
+            font-size: 1rem;
+            color: var(--text-gray);
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .mnemonic-box {
+            background-color: var(--accent-orange);
             color: white;
-            transform: translateY(-0.5rem);
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
         }
 
-        .hover-sky:hover { background-color: #38bdf8; }
-        .hover-pink:hover { background-color: #ec4899; }
-        .hover-slate:hover { background-color: #1e293b; }
-        .hover-emerald:hover { background-color: #10b981; }
+        .example-divider {
+            border-top: 1.5px dashed #cbd5e1;
+            margin: 1rem 0;
+            width: 100%;
+        }
+
+        .example-text {
+            font-size: 1.25rem;
+            color: var(--text-gray);
+            font-style: italic;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .audio-btn {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .audio-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* 標題裝飾 */
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+            letter-spacing: -0.025em;
+        }
     </style>
 </head>
-<body class="relative min-h-screen w-full flex items-center justify-center">
+<body>
 
-    <!-- 裝飾性背景元素 - 漂浮的圓圈 -->
-    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-[10%] left-[15%] w-32 h-32 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div class="absolute top-[20%] right-[20%] w-40 h-40 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[20%] left-[25%] w-36 h-36 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    <header class="page-header">
+        <h1>🧠 B2L4 互動單字記憶卡</h1>
+        <p class="text-slate-500 mt-2">點擊卡片翻面，自動朗讀單字</p>
+    </header>
+
+    <div id="vocab-container" class="vocab-grid">
+        <!-- 卡片將由 JavaScript 動態生成 -->
     </div>
-
-    <!-- 底部波浪裝飾 -->
-    <div class="absolute bottom-0 left-0 w-full leading-[0] z-0">
-        <svg viewBox="0 0 1440 320" class="w-full h-auto">
-            <path 
-                fill="#3B82F6" 
-                fill-opacity="1" 
-                d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-            ></path>
-        </svg>
-    </div>
-
-    <!-- 主要內容區塊 -->
-    <main class="relative z-10 flex flex-col items-center text-center px-6">
-        
-        <!-- 插畫角色 / 圖示組合 -->
-        <div class="relative mb-10 group">
-            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl transition-transform duration-500 hover:scale-110">
-                <div class="relative">
-                    <i data-lucide="construction" class="w-16 h-16 text-blue-500 animate-bounce"></i>
-                    <div class="absolute -top-4 -right-4 rotate-12">
-                        <i data-lucide="hard-hat" class="w-10 h-10 text-yellow-500"></i>
-                    </div>
-                </div>
-            </div>
-            <!-- 裝飾小方塊 -->
-            <div class="absolute -top-2 -left-2 w-6 h-6 bg-yellow-400 rounded-md rotate-12 animate-pulse"></div>
-            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-400 rounded-full animate-bounce"></div>
-        </div>
-
-        <!-- 文字標題 -->
-        <div class="space-y-4">
-            <h1 class="text-5xl sm:text-7xl font-black text-slate-800 tracking-tight">
-                正在大改造中 <span class="inline-block animate-pulse text-blue-500">!</span>
-            </h1>
-            <p class="text-xl sm:text-2xl font-bold text-slate-500">
-                很快就會和大家見面了。
-            </p>
-        </div>
-
-        <!-- 描述文字 -->
-        <p class="mt-8 text-slate-400 max-w-md font-medium leading-relaxed">
-            我們正在努力完善網站的每一個細節，<br />
-            為了帶給你最棒的體驗，請再稍等一下下！
-        </p>
-
-        <!-- 社交媒體按鈕 -->
-        <div class="mt-12 flex gap-6">
-            <a href="#" class="social-icon hover-sky"><i data-lucide="twitter"></i></a>
-            <a href="#" class="social-icon hover-pink"><i data-lucide="instagram"></i></a>
-            <a href="#" class="social-icon hover-slate"><i data-lucide="github"></i></a>
-            <a href="#" class="social-icon hover-emerald"><i data-lucide="globe"></i></a>
-        </div>
-
-        <!-- 頁尾小字 -->
-        <div class="mt-20">
-            <p class="text-white text-sm font-bold tracking-widest uppercase opacity-80">
-                © 2026 Your Brand Studio
-            </p>
-        </div>
-    </main>
 
     <script>
-        // 初始化 Lucide 圖示
-        lucide.createIcons();
+        const words = [
+            { "en": "consider", "ph": "[kənˋsɪdɚ]", "pos": "vt.; vi.", "cn": "考慮", "strategy": "諧音 (肯捨得)", "mnemonic": "你要考慮清楚，是否肯捨得花錢買玩具。", "ex": "Patrick is considering buying a Happy Meal to get the free toy.", "grid": 1, "pos_idx": 0 },
+            { "en": "situation", "ph": "[͵sɪtʃᴜˋeʃən]", "pos": "n. [C]", "cn": "情況", "strategy": "諧音 (細究一陣)", "mnemonic": "面對複雜的情況，我們需要細究一陣才能搞清楚。", "ex": "The red button in the public toilet is for dangerous situations only.", "grid": 1, "pos_idx": 1 },
+            { "en": "tend", "ph": "[tɛnd]", "pos": "vi.", "cn": "傾向，往往", "strategy": "諧音 (天燈)", "mnemonic": "人們往往傾向把願望寫在天燈上放飛。", "ex": "Irene tends to choose a window seat when she takes a plane.", "grid": 1, "pos_idx": 2 },
+            { "en": "crowd", "ph": "[kraᴜd]", "pos": "n. [C]", "cn": "群眾", "strategy": "諧音 (烤肉的)", "mnemonic": "那邊有免費烤肉的活動，吸引了一大票群眾。", "ex": "The Christmas event was fun, so it attracted large crowds of people.", "grid": 1, "pos_idx": 3 },
+            { "en": "daily", "ph": "[ˋdelɪ]", "pos": "adj.", "cn": "日常的，每天的", "strategy": "圖像 (Day-天)", "mnemonic": "每一天的日常瑣事，都要用心完成。", "ex": "The daily job of some social workers is to check on how poor families are doing.", "grid": 1, "pos_idx": 4 },
+            { "en": "suddenly", "ph": "[ˋsʌdṇlɪ]", "pos": "adv.", "cn": "突然", "strategy": "諧音 (煞到你)", "mnemonic": "轉角突然撞到他，沒想到一眼就煞到你！", "ex": "The earthquake occurred suddenly and scared my parents.", "grid": 1, "pos_idx": 5 },
+            { "en": "include", "ph": "[ɪnˋklud]", "pos": "vt.", "cn": "包括", "strategy": "字根 (in-進入 + clud-關閉)", "mnemonic": "把配菜都關進盒裡，包括你最愛的雞腿。", "ex": "This set lunch includes a main dish and a drink.", "grid": 1, "pos_idx": 6 },
+            { "en": "including", "ph": "[ɪnˋkludɪŋ]", "pos": "prep.", "cn": "包含", "strategy": "諧音 (硬扣進)", "mnemonic": "行李爆滿了，你還要將龍蝦硬扣進去才算包含完整嗎？", "ex": "Certain behavior is not allowed in the race, including pushing and hitting others.", "grid": 1, "pos_idx": 7 },
+            { "en": "gesture", "ph": "[ˋdʒɛstʃɚ]", "pos": "n. [C][U]", "cn": "手勢", "strategy": "諧音 (真是扯)", "mnemonic": "他比出的那個手勢含義真是扯，沒人懂。", "ex": "Michael made a gesture to tell his team member to shoot the ball.", "grid": 1, "pos_idx": 8 },
+            { "en": "rapid", "ph": "[ˋræpɪd]", "pos": "adj.", "cn": "迅速的", "strategy": "諧音 (雷劈的)", "mnemonic": "這跑車像被雷劈的一樣，迅速地衝過終點。", "ex": "The rapid change in the weather made me catch a cold.", "grid": 1, "pos_idx": 9 },
+            { "en": "besides", "ph": "[bɪˋsaɪdz]", "pos": "adv.", "cn": "此外", "strategy": "字根 (be + sides 旁邊)", "mnemonic": "除了主餐，在旁邊此外還附贈了一塊蛋糕。", "ex": "I don’t feel like eating out tonight. Besides, I spent too much money this month.", "grid": 1, "pos_idx": 10 },
+            { "en": "drama", "ph": "[ˋdrɑmə]", "pos": "n. [C]", "cn": "戲劇", "strategy": "諧音 (抓馬)", "mnemonic": "這部戲劇情節太浮誇了，根本就是在抓馬！", "ex": "It is surprising that the singer plays the role of a clown in the new TV drama.", "grid": 1, "pos_idx": 11 },
+            { "en": "unfortunately", "ph": "[ʌnˋfɔrtʃənɪtlɪ]", "pos": "adv.", "cn": "不幸地", "strategy": "諧音 (安份求哪裡)", "mnemonic": "不幸地跌倒了，大喊：要我安份，那好運要安份求哪裡呢？", "ex": "Sherry came for her favorite dessert at the café. Unfortunately, it was not open.", "grid": 1, "pos_idx": 12 },
+            { "en": "harmful", "ph": "[ˋhɑrmfəl]", "pos": "adj.", "cn": "有害的", "strategy": "諧音 (哈姆)", "mnemonic": "讓哈姆太郎吃太多泡麵，絕對是有害的。", "ex": "Eating too many instant noodles can be harmful to our health.", "grid": 1, "pos_idx": 13 },
+            { "en": "pressure", "ph": "[ˋprɛʃɚ]", "pos": "n. [U][C]", "cn": "壓力", "strategy": "字根 (press 壓)", "mnemonic": "他感覺很有壓力，因為要用力往下壓這顆大石頭。", "ex": "The young singer is under a lot of pressure to perform well in the big show.", "grid": 1, "pos_idx": 14 },
+            { "en": "isolate", "ph": "[ˋaɪsə͵let]", "pos": "vt.", "cn": "孤立", "strategy": "諧音 (挨，誰理?)", "mnemonic": "坐在牆角挨著牆，誰理你？你被徹底孤立了。", "ex": "The island is isolated by oceans, so we need to go there by boat.", "grid": 2, "pos_idx": 0 },
+            { "en": "cutlet", "ph": "[ˋkʌtlɪt]", "pos": "n. [C]", "cn": "肉排", "strategy": "諧音 (砍它)", "mnemonic": "把這塊大肉給砍它幾刀，就變好吃的肉排了。", "ex": "The chef prepared a crispy chicken cutlet for the customer.", "grid": 2, "pos_idx": 1 },
+            { "en": "stall", "ph": "[stɔl]", "pos": "n. [C]", "cn": "攤子，攤位", "strategy": "諧音 (食堂)", "mnemonic": "這個夜市攤位雖然小，卻是我的深夜食堂。", "ex": "There are many food stalls in the night market.", "grid": 2, "pos_idx": 2 },
+            { "en": "vendor", "ph": "[ˋvɛndɚ]", "pos": "n. [C]", "cn": "攤販", "strategy": "諧音 (免得)", "mnemonic": "這位攤販趕快把蓋子蓋上，免得灰塵跑進去。", "ex": "The street vendor sells delicious stinky tofu.", "grid": 2, "pos_idx": 3 },
+            { "en": "poker face", "ph": "[ˋpokɚ ͵fes]", "pos": "n. [C]", "cn": "撲克臉", "strategy": "圖像 (Poker Face)", "mnemonic": "玩撲克牌時要維持臉部沒表情，這就是撲克臉。", "ex": "It’s hard to tell what he’s thinking because he always has a poker face.", "grid": 2, "pos_idx": 4 },
+            { "en": "herd", "ph": "[hɝd]", "pos": "n. [C]", "cn": "群眾；牧群", "strategy": "諧音 (喝的)", "mnemonic": "這大批牧群全都在搶喝的水。", "ex": "A herd of cows is grazing in the field.", "grid": 2, "pos_idx": 5 },
+            { "en": "peer", "ph": "[pɪr]", "pos": "n. [C]", "cn": "同儕，同輩", "strategy": "諧音 (屁兒)", "mnemonic": "同儕就是那群跟在你屁兒後面一起鬧的朋友。", "ex": "Teenagers are often influenced by their peers.", "grid": 2, "pos_idx": 6 },
+            { "en": "bully", "ph": "[ˋbᴜlɪ]", "pos": "vt.", "cn": "霸凌", "strategy": "諧音 (不理)", "mnemonic": "他愛霸凌別人，大家乾脆集體不理他。", "ex": "You should tell a teacher if someone tries to bully you.", "grid": 2, "pos_idx": 7 },
+            { "en": "in contrast", "ph": "[ɪn ˈkɑntræst]", "pos": "phr.", "cn": "相比之下", "strategy": "諧音 (看穿)", "mnemonic": "相比之下，我一眼就看穿了兩者的巨大差異。", "ex": "In contrast to her sister, Mary is very shy.", "grid": 2, "pos_idx": 8 },
+            { "en": "rather than", "ph": "[ˈræðɚ ðæn]", "pos": "phr.", "cn": "而不是", "strategy": "諧音 (熱的臉)", "mnemonic": "他希望對方給他一張熱的臉微笑，而不是冷冰冰的臭臉。", "ex": "I prefer to have tea rather than coffee.", "grid": 2, "pos_idx": 9 },
+            { "en": "on one's own", "ph": "[ɔn wʌnz on]", "pos": "phr.", "cn": "獨立，獨自", "strategy": "圖像 (Own-自己)", "mnemonic": "他完全靠自己，獨立蓋好積木城堡。", "ex": "She finished the huge puzzle all on her own.", "grid": 2, "pos_idx": 10 },
+            { "en": "be known as", "ph": "[bi non æz]", "pos": "phr.", "cn": "被稱為……", "strategy": "諧音 (鼻弄紅)", "mnemonic": "他的鼻子被弄紅之後，就被稱為魯道夫。", "ex": "New York City is commonly known as the Big Apple.", "grid": 2, "pos_idx": 11 },
+            { "en": "stick to", "ph": "[stɪk tu]", "pos": "phr.", "cn": "堅持，衷於", "strategy": "諧音 (死貼)", "mnemonic": "堅持目標，就要像貼紙一樣死貼在上面不放手。", "ex": "You should stick to your plan if you want to succeed.", "grid": 2, "pos_idx": 12 }
+        ];
+
+        const grids = {
+            1: "https://github.com/terenceylhc/vocB2/blob/main/B2L4G1.jpg?raw=true",
+            2: "https://github.com/terenceylhc/vocB2/blob/main/B2L4G2.jpg?raw=true"
+        };
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function createCard(data) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            // 計算精確的 background-position (4x4 網格)
+            const row = Math.floor(data.pos_idx / 4);
+            const col = data.pos_idx % 4;
+            const posX = (col / 3) * 100;
+            const posY = (row / 3) * 100;
+
+            card.innerHTML = `
+                <div class="card-inner">
+                    <!-- 正面 -->
+                    <div class="card-front">
+                        <div class="image-container">
+                            <div class="sprite-img" style="background-image: url('${grids[data.grid]}'); background-position: ${posX}% ${posY}%;"></div>
+                        </div>
+                        <div class="front-content">
+                            <h2 class="word-title-front">${data.en}</h2>
+                            <div class="phonetic-row">
+                                <span>${data.ph}</span>
+                                <button class="audio-btn" onclick="event.stopPropagation(); speak('${data.en}')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 反面 -->
+                    <div class="card-back">
+                        <h2 class="word-title-back">${data.en}</h2>
+                        <div class="meaning-row">
+                            <span class="pos-tag">${data.pos}</span>
+                            <span class="chinese-mean">${data.cn}</span>
+                        </div>
+                        <div class="strategy-tip">💡 策略：${data.strategy}</div>
+                        <div class="mnemonic-box">
+                            ${data.mnemonic}
+                        </div>
+                        <div class="example-divider"></div>
+                        <p class="example-text">"${data.ex}"</p>
+                    </div>
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                const isFlipped = card.classList.toggle('flipped');
+                if (isFlipped) {
+                    // 翻到背面時自動朗讀
+                    setTimeout(() => speak(data.en), 200);
+                }
+            });
+
+            return card;
+        }
+
+        const container = document.getElementById('vocab-container');
+        words.forEach(word => {
+            container.appendChild(createCard(word));
+        });
     </script>
 </body>
 </html>
