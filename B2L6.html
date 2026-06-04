@@ -130,9 +130,26 @@
             const row = Math.floor(item.pos_idx / 4);
             
             // 計算 background-position 百分比 (3 等分對應 0%, 33.33%, 66.66%, 100%)
-            const bgPosX = col * (100 / 3);
-            const bgPosY = row * (100 / 3);
+            let bgPosX = col * (100 / 3);
+            let bgPosY = row * (100 / 3);
+            let bgSize = 406; // 預設的 406% 放大率
             const bgImage = item.grid === 1 ? g1 : g2;
+
+            // 根據您的需求，從 insistence (grid 2, pos_idx 4) 開始微調
+            if (item.grid === 2) {
+                // 第二排 (row === 1)
+                if (row === 1) {
+                     // 略微增加 Y 軸百分比，將圖片往下推，隱藏上方的線條
+                     bgPosY = bgPosY + 1.5; 
+                }
+                // 第三排 (row === 2)：只針對最後這三個字
+                else if (row === 2) {
+                     // 因為上下邊框都露出來，代表垂直方向不夠滿，所以單獨增加這三個的放大率
+                     bgSize = 418; 
+                     // 放大之後只需微調一點點即可保持置中對齊
+                     bgPosY = bgPosY + 1.0; 
+                }
+            }
 
             // 創建卡片容器
             const cardElement = document.createElement('div');
@@ -142,11 +159,11 @@
                 <div class="flip-card-inner">
                     <!-- 正面呈現 (Visual Cue Panel) -->
                     <div class="flip-card-front bg-white">
-                        <!-- 影像區：比例 16:9，406% 溢位裁切 -->
+                        <!-- 影像區：比例 16:9，根據 bgSize 進行溢位裁切 -->
                         <div class="w-full aspect-[16/9] overflow-hidden relative rounded-t-[28px]">
                             <div class="absolute inset-0 w-full h-full"
                                  style="background-image: url('${bgImage}'); 
-                                        background-size: 406%; 
+                                        background-size: ${bgSize}%; 
                                         background-position: ${bgPosX}% ${bgPosY}%; 
                                         background-repeat: no-repeat;">
                             </div>
