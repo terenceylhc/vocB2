@@ -3,412 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🧠 B2L5 互動單字記憶卡</title>
+    <title>🧠 B2L6 互動單字記憶卡</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9; /* slate-100 */
-        }
-        
-        /* 高度自適應翻轉卡片核心技術 (CSS Grid Layering) */
-        .flip-card-container {
-            perspective: 1000px;
-            /* 讓容器成為 Grid，讓正反面疊在同一個網格位置 */
-            display: grid; 
-            cursor: pointer;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
         }
 
-        .flip-card-face {
+        .flip-card {
+            perspective: 1500px;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 使用 Grid 疊加技術，讓卡片高度能隨正反面內容自動撐開，無需固定高度 */
+        .flip-card-inner {
+            display: grid;
+            grid-template-columns: 1fr;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            border-radius: 28px;
+            background-color: white;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            height: 100%;
+        }
+
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
             grid-area: 1 / 1;
             backface-visibility: hidden;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-
-        .flip-card-front {
-            transform: rotateY(0deg);
-            z-index: 2;
+            -webkit-backface-visibility: hidden;
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
         }
 
         .flip-card-back {
-            transform: rotateY(-180deg);
-        }
-
-        /* 翻轉狀態 */
-        .flip-card-container.flipped .flip-card-front {
             transform: rotateY(180deg);
         }
-        .flip-card-container.flipped .flip-card-back {
-            transform: rotateY(0deg);
-        }
 
-        /* 終極版：置中溢位裁切技術 (Deep Centered Safe Zone Cropping) */
-        .sprite-img {
-            background-size: 400% 400%; /* 回歸 400% 完美網格定位 */
-            background-repeat: no-repeat;
-            /* 將放大倍率提升至 1.1 (10%)，確保能把原圖較粗的白色/黑色分隔線完全裁切掉 */
-            transform: scale(1.1); 
-            transform-origin: center center;
+        /* 隱藏捲軸保持美觀 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body class="min-h-screen py-10 px-4">
+<body class="py-10 px-4 md:px-8">
 
-    <div class="max-w-7xl mx-auto">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl md:text-5xl font-black text-[#0f172a] mb-4">🧠 B2L5 互動單字記憶卡</h1>
-            <p class="text-slate-500 text-lg">點擊卡片翻面並聆聽發音，利用圖像與口訣加深記憶！</p>
-        </header>
+    <header class="max-w-5xl mx-auto mb-10 text-center">
+        <h1 class="text-4xl md:text-5xl font-black text-[#0f172a] mb-4 tracking-tight">🧠 B2L6 互動單字記憶卡</h1>
+        <p class="text-[#64748b] text-lg">點擊卡片進行翻轉，並自動聆聽發音</p>
+    </header>
 
-        <!-- 卡片網格容器：移除 items-start，改用 items-stretch 強制同一列的卡片高度保持一致 -->
-        <div id="card-grid" class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-            <!-- 卡片將由 JavaScript 動態生成 -->
-        </div>
-    </div>
+    <main id="app-grid" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <!-- 卡片將由 JavaScript 動態生成 -->
+    </main>
 
     <script>
+        const g1 = 'https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L6G1.jpg';
+        const g2 = 'https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L6G2.jpg';
+
         const vocabData = [
-          {
-            "en": "costume",
-            "ph": "[ˋkɑstum]",
-            "pos": "n.",
-            "cn": "(特殊場合的) 服裝",
-            "strategy": "諧音記憶法(卡式提)",
-            "mnemonic": "提著一台舊卡式錄音機（卡式提），身上卻穿著超級瑪利歐的服裝，這混搭太有型了！",
-            "ex": "Ted went to the Halloween party in a Super Mario costume.",
-            "grid": 1,
-            "pos_idx": 0
-          },
-          {
-            "en": "ability",
-            "ph": "[əˋbɪlətɪ]",
-            "pos": "n.",
-            "cn": "才能",
-            "strategy": "諧音記憶法(鵝比例)",
-            "mnemonic": "這隻巨鵝調配調酒的比例精準，展現驚人的調酒才能。",
-            "ex": "The girl is known for her language ability.",
-            "grid": 1,
-            "pos_idx": 1
-          },
-          {
-            "en": "weakness",
-            "ph": "[ˋwiknɪs]",
-            "pos": "n.",
-            "cn": "缺點，弱點",
-            "strategy": "諧音記憶法(餵雞女士)",
-            "mnemonic": "餵雞女士在尼斯湖畔瘋狂餵雞，把雞餵得太重飛不起來，是牠致命的缺點與弱點。",
-            "ex": "This scooter only has one weakness—it is too heavy for me.",
-            "grid": 1,
-            "pos_idx": 2
-          },
-          {
-            "en": "personal",
-            "ph": "[ˋpɝsṇḷ]",
-            "pos": "adj.",
-            "cn": "個人的，私人的",
-            "strategy": "字根字首拆解(person人 + al形容詞字尾)",
-            "mnemonic": "每個人（person）都有不穿制服、屬於個人的、私人的生活空間。",
-            "ex": "Ann seldom talks about her personal life, so we know very little about her.",
-            "grid": 1,
-            "pos_idx": 3
-          },
-          {
-            "en": "normal",
-            "ph": "[ˋnɔrmḷ]",
-            "pos": "adj.",
-            "cn": "一般的，正常的",
-            "strategy": "諧音記憶法(鬧貓)",
-            "mnemonic": "天天在房間鬧貓，這對一個貓奴來說是非常正常的、一般的行為。",
-            "ex": "It is normal for the boy to feel sad when his pet dies.",
-            "grid": 1,
-            "pos_idx": 4
-          },
-          {
-            "en": "murder",
-            "ph": "[ˋmɝdɚ]",
-            "pos": "vt.",
-            "cn": "謀殺",
-            "strategy": "諧音記憶法(沒得)",
-            "mnemonic": "凶手心狠手辣，讓被害人沒得商量就被謀殺了。",
-            "ex": "After the pop star was murdered, all of his fans cried over his death.",
-            "grid": 1,
-            "pos_idx": 5
-          },
-          {
-            "en": "depressed",
-            "ph": "[dɪˋprɛst]",
-            "pos": "adj.",
-            "cn": "沮喪的，憂鬱的",
-            "strategy": "字根字首拆解(de向下 + press按壓)",
-            "mnemonic": "心情不斷被向下（de）按壓（press），整個人變得非常沮喪的、憂鬱的。",
-            "ex": "Gina just broke up with her boyfriend, and she was very depressed about it.",
-            "grid": 1,
-            "pos_idx": 6
-          },
-          {
-            "en": "crime",
-            "ph": "[kraɪm]",
-            "pos": "n.",
-            "cn": "犯罪，罪行",
-            "strategy": "諧音記憶法(哭罵)",
-            "mnemonic": "因為網路犯罪被警察抓走，媽媽在一旁痛苦地哭罵。",
-            "ex": "Today, computer crime is a big problem. A lot of people use viruses to attack others’ computers.",
-            "grid": 1,
-            "pos_idx": 7
-          },
-          {
-            "en": "anger",
-            "ph": "[ˋæŋgɚ]",
-            "pos": "n.",
-            "cn": "憤怒，生氣",
-            "strategy": "圖像記憶法(Anger發音像「按個」)",
-            "mnemonic": "因為太過憤怒與生氣，他用力「按個」傳送鍵，發出了大段罵人訊息。",
-            "ex": "Ben sent a long message to Jane in anger because she forgot about their date.",
-            "grid": 1,
-            "pos_idx": 8
-          },
-          {
-            "en": "protect",
-            "ph": "[prəˋtɛkt]",
-            "pos": "vt.",
-            "cn": "保護",
-            "strategy": "諧音記憶法(破鐵殼)",
-            "mnemonic": "穿上這件破鐵殼盔，就能在戰場上保護自己。",
-            "ex": "My brother wore a mask to protect himself from the dirty air.",
-            "grid": 1,
-            "pos_idx": 9
-          },
-          {
-            "en": "childhood",
-            "ph": "[ˋtʃaɪld͵hᴜd]",
-            "pos": "n.",
-            "cn": "童年，孩童時期",
-            "strategy": "字根字首拆解(child兒童 + hood狀態/時期)",
-            "mnemonic": "戴著斗篷（hood）的兒童（child），正在享受他無憂無慮的童年。",
-            "ex": "I had a lovely blanket in my childhood, but it is gone now.",
-            "grid": 1,
-            "pos_idx": 10
-          },
-          {
-            "en": "female",
-            "ph": "[ˋfimel]",
-            "pos": "adj.",
-            "cn": "女性的",
-            "strategy": "字根字首拆解(fe費 + male男性)",
-            "mnemonic": "女性的專用廁所門口，掛著一個漂亮的女性洋裝圖標。",
-            "ex": "According to the report, there are fewer female taxi drivers than male ones.",
-            "grid": 1,
-            "pos_idx": 11
-          },
-          {
-            "en": "respect",
-            "ph": "[rɪˋspɛkt]",
-            "pos": "vt.",
-            "cn": "尊敬",
-            "strategy": "字根字首拆解(re重複 + spect看)",
-            "mnemonic": "因為對他充滿尊敬，大家反覆（re）看著（spect）他的善舉影片並紛紛鞠躬。",
-            "ex": "Many people respect Jam Hsiao for his acts of kindness.",
-            "grid": 1,
-            "pos_idx": 12
-          },
-          {
-            "en": "emotion",
-            "ph": "[ɪˋmoʃən]",
-            "pos": "n.",
-            "cn": "情緒，情感",
-            "strategy": "字根字首拆解(e外出 + motion移動)",
-            "mnemonic": "他無法隱藏內心的情緒，喜怒哀樂都像齒輪一樣往外轉動。",
-            "ex": "Mike is not good at hiding his emotions. Everyone knows if he is happy or sad.",
-            "grid": 1,
-            "pos_idx": 13
-          },
-          {
-            "en": "negative",
-            "ph": "[ˋnɛgətɪv]",
-            "pos": "adj.",
-            "cn": "不好的，負面的",
-            "strategy": "諧音記憶法(那個鵜鶘)",
-            "mnemonic": "那個鵜鶘在動物園裡竟然大口把同事（水豚）吃掉，這真是一種不可取、不好的、負面的行為！",
-            "ex": "Going to bed late has a negative effect on the human body.",
-            "grid": 1,
-            "pos_idx": 14
-          },
-          {
-            "en": "superhero",
-            "ph": "[ˋsupɚ͵hɪro]",
-            "pos": "n.",
-            "cn": "超級英雄",
-            "strategy": "字根字首拆解(super超級 + hero英雄)",
-            "mnemonic": "穿著拉風斗篷的超級英雄，雙手叉腰傲然站立在摩天大樓頂端保護城市。",
-            "ex": "Iron Man is a famous superhero who saves the world.",
-            "grid": 2,
-            "pos_idx": 0
-          },
-          {
-            "en": "high-tech",
-            "ph": "[͵haɪˋtɛk]",
-            "pos": "adj.",
-            "cn": "高科技的",
-            "strategy": "諧音記憶法(嗨！泰克)",
-            "mnemonic": "對著那台會飛的高科技的機器人熱情大喊：「嗨！泰克（機器人的名字）！」",
-            "ex": "This modern hospital uses a lot of high-tech equipment.",
-            "grid": 2,
-            "pos_idx": 1
-          },
-          {
-            "en": "weapon",
-            "ph": "[ˋwɛpən]",
-            "pos": "n.",
-            "cn": "武器",
-            "strategy": "諧音記憶法(外噴)",
-            "mnemonic": "這把科技水槍是我的秘密武器，一射擊水柱就往外噴！",
-            "ex": "The police found the hidden weapon in the suspect's car.",
-            "grid": 2,
-            "pos_idx": 2
-          },
-          {
-            "en": "pilot",
-            "ph": "[ˋpaɪlət]",
-            "pos": "n.",
-            "cn": "飛行員",
-            "strategy": "諧音記憶法(拍樂得)",
-            "mnemonic": "帥氣的飛行員在開飛機時，還不忘用拍立得（拍樂得）相機自拍。",
-            "ex": "The pilot safely landed the airplane during the heavy storm.",
-            "grid": 2,
-            "pos_idx": 3
-          },
-          {
-            "en": "extraordinary",
-            "ph": "[ɪkˋstrɔrdṇ͵ɛrɪ]",
-            "pos": "adj.",
-            "cn": "非凡的",
-            "strategy": "字根字首拆解(extra超出 + ordinary普通的)",
-            "mnemonic": "這隻鳥擁有非凡的天賦，能做出遠遠超出（extra）普通（ordinary）鳥類的特技表演！",
-            "ex": "The young magician has an extraordinary talent for magic tricks.",
-            "grid": 2,
-            "pos_idx": 4
-          },
-          {
-            "en": "believe it or not",
-            "ph": "[bɪˋliv ɪt ɔr nɑt]",
-            "pos": "phr.",
-            "cn": "信不信由你",
-            "strategy": "圖像記憶法(貓咪不吃甜)",
-            "mnemonic": "信不信由你，高傲的貓咪其實一輩子都嚐不出甜的味道。",
-            "ex": "Believe it or not, cats cannot taste sweet things.",
-            "grid": 2,
-            "pos_idx": 5
-          },
-          {
-            "en": "get over",
-            "ph": "[gɛt ˋovɚ]",
-            "pos": "phr.",
-            "cn": "從……恢復",
-            "strategy": "圖像記憶法(跨越障礙)",
-            "mnemonic": "雖然跌倒受傷很痛，但只要勇敢跨過去（over），就能從傷痛中恢復並走出來。",
-            "ex": "Although Maggie was sad about her breakup, she soon got over it.",
-            "grid": 2,
-            "pos_idx": 6
-          },
-          {
-            "en": "make A into B",
-            "ph": "[mek A ˋɪntu B]",
-            "pos": "phr.",
-            "cn": "把A變成B",
-            "strategy": "圖像記憶法(神奇魔術師)",
-            "mnemonic": "神奇魔術師大顯身手，竟然把一條平凡的長棍麵包（A）變成了一隻活生生的可愛鴿子（B）。",
-            "ex": "The producer made the baker’s story into a TV drama.",
-            "grid": 2,
-            "pos_idx": 7
-          }
+          { "en": "bargain", "ph": "[ˋbɑrgən]", "pos": "n./vi.", "cn": "特價商品/討價還價", "strategy": "諧音(把根)", "mnemonic": "把這根大香蕉把根拔走，老闆算你特價商品，不用再討價還價了！", "ex": "I spent only NT$100 getting ten giant packs of toilet paper. It was a real bargain!", "grid": 1, "pos_idx": 0 },
+          { "en": "quality", "ph": "[ˋkwɑlətɪ]", "pos": "n.", "cn": "品質", "strategy": "諧音(誇落去)", "mnemonic": "這家店的品質好到讓人豎起大拇指誇落去！", "ex": "The driver is mad about the poor quality of the road. There are too many holes in it.", "grid": 1, "pos_idx": 1 },
+          { "en": "company", "ph": "[ˋkʌmpənɪ]", "pos": "n.", "cn": "公司", "strategy": "諧音(看陪你)", "mnemonic": "這家公司的福利超讚，就看陪你加班的主管會不會發零食。", "ex": "This company produces the best bicycles in the world.", "grid": 1, "pos_idx": 2 },
+          { "en": "career", "ph": "[kəˋrɪr]", "pos": "n.", "cn": "職業生涯，事業", "strategy": "諧音(可以、啊！)", "mnemonic": "主管對他的整個職業生涯評估後說：看這優秀的業績，升遷可以、啊！", "ex": "Rafael Nadal started his tennis career at the age of 16.", "grid": 1, "pos_idx": 3 },
+          { "en": "explode", "ph": "[ɪkˋsplod]", "pos": "vi.", "cn": "爆炸", "strategy": "諧音(一口破)", "mnemonic": "這顆巨無霸氣球被他用嘴巴一口破壞，瞬間爆炸了！", "ex": "Because Megan shook the soda, it exploded when she opened the can.", "grid": 1, "pos_idx": 4 },
+          { "en": "injure", "ph": "[ˋɪndʒɚ]", "pos": "vt.", "cn": "使受傷", "strategy": "諧音(硬折)", "mnemonic": "這根鋼筋被大力士硬折，反彈回來反而使受傷了。", "ex": "Marcus was seriously injured after he fell down the stairs.", "grid": 1, "pos_idx": 5 },
+          { "en": "instead", "ph": "[ɪnˋstɛd]", "pos": "adv.", "cn": "相反地，卻", "strategy": "諧音(硬死盯)", "mnemonic": "本來該去看電影，他相反地不肯走，硬死盯著店裡的玩具不放。", "ex": "Andy’s fingers were hurt, so I cooked instead.", "grid": 1, "pos_idx": 6 },
+          { "en": "improve", "ph": "[ɪmˋpruv]", "pos": "vt.", "cn": "改進，改善", "strategy": "諧音(銀鋪路)", "mnemonic": "為了改進交通，政府用銀鋪路，馬路變得亮晶晶。", "ex": "To improve her English, Helen listens to English radio programs every day.", "grid": 1, "pos_idx": 7 },
+          { "en": "skill", "ph": "[skɪl]", "pos": "n.", "cn": "技巧，技能", "strategy": "諧音(四勾)", "mnemonic": "這個魔術師非常有技巧，能用四勾在空中同時勾住四個飛行的火圈！", "ex": "Mr. Hu is famous for his skills in decorating traditional temples.", "grid": 1, "pos_idx": 8 },
+          { "en": "demand", "ph": "[dɪˋmænd]", "pos": "vt./n.", "cn": "要求；需求", "strategy": "諧音(地毯/底面)", "mnemonic": "顧客要求退款，氣到把大地毯翻過來，說連這底面（demand）都有瑕疵，市場沒這需求！", "ex": "The customer is demanding a refund for the broken hair dryer he bought yesterday.", "grid": 1, "pos_idx": 9 },
+          { "en": "product", "ph": "[ˋprɑdəkt]", "pos": "n.", "cn": "產品", "strategy": "諧音(Pro 鴨子)", "mnemonic": "這家科技工廠研發的新產品，是一隻戴著智能眼鏡的 Pro 級鴨子！", "ex": "The colorful masking tapes are the most popular product in this shop.", "grid": 1, "pos_idx": 10 },
+          { "en": "supply", "ph": "[səˋplaɪ]", "pos": "vt./n.", "cn": "提供，供應/供應量", "strategy": "諧音(沙排)", "mnemonic": "夏天海灘辦沙排大賽，主辦方免費提供無限量的椰子汁，供應量充足！", "ex": "The hotel supplies its guests with umbrellas for free when it rains.", "grid": 1, "pos_idx": 11 },
+          { "en": "succeed", "ph": "[səkˋsid]", "pos": "vi.", "cn": "成功", "strategy": "諧音(一口氣吸)", "mnemonic": "他一口氣吸起了一顆超大珍珠，終於成功喝完這杯飲料！", "ex": "With the food in his hand, Nick succeeded in attracting several ducks to come near him.", "grid": 1, "pos_idx": 12 },
+          { "en": "gentle", "ph": "[ˋdʒɛntḷ]", "pos": "adj.", "cn": "溫柔的", "strategy": "諧音(枕頭)", "mnemonic": "爸爸用像枕頭一樣溫柔的聲音，在床邊讀故事書。", "ex": "The father read a bedtime story to his daughter in a gentle voice.", "grid": 1, "pos_idx": 13 },
+          { "en": "clay", "ph": "[kle]", "pos": "n.", "cn": "陶土，泥土", "strategy": "諧音(可累)", "mnemonic": "用這堆陶土捏一隻巨馬真可累死我了！", "ex": "The artist used clay to shape a beautiful vase.", "grid": 1, "pos_idx": 14 },
+          { "en": "flock", "ph": "[flɑk]", "pos": "vi.", "cn": "聚集，蜂擁", "strategy": "諧音(扶老客)", "mnemonic": "百貨公司大特價，店員們扶老客進門，因為門口聚集了蜂擁而入的人潮！", "ex": "Thousands of fans flocked to the stadium to see the pop star.", "grid": 2, "pos_idx": 0 },
+          { "en": "mug", "ph": "[mʌg]", "pos": "n.", "cn": "馬克杯", "strategy": "圖像(貓咪耳朵)", "mnemonic": "這個大馬克杯上印著一隻貓咪，杯把做成貓咪耳朵的形狀，超級萌！", "ex": "She drank a hot mug of cocoa to warm up.", "grid": 2, "pos_idx": 1 },
+          { "en": "ceramics", "ph": "[səˋræmɪks]", "pos": "n.", "cn": "陶瓷工藝", "strategy": "諧音(洗拉摸)", "mnemonic": "為了學習頂級的陶瓷工藝，他跑到山上去洗泥土、拉坏、摸捏作品。", "ex": "The museum is famous for its collection of ancient Chinese ceramics.", "grid": 2, "pos_idx": 2 },
+          { "en": "pottery", "ph": "[ˋpɑtərɪ]", "pos": "n.", "cn": "陶器", "strategy": "諧音(跑特利)", "mnemonic": "哈利波特跑特利害，竟然用魔法在三秒內變出一個精美的陶器大花瓶！", "ex": "She bought a beautiful piece of pottery at the local market.", "grid": 2, "pos_idx": 3 },
+          { "en": "insistence", "ph": "[ɪnˋsɪstəns]", "pos": "n.", "cn": "堅持", "strategy": "諧音(硬是要省)", "mnemonic": "大熱天他出於對省錢的堅持，硬是要省那幾塊錢，絕對不開冷氣！", "ex": "Because of his insistence on quality, the restaurant became very successful.", "grid": 2, "pos_idx": 4 },
+          { "en": "kilometer", "ph": "[ˋkɪlə͵mitɚ]", "pos": "n.", "cn": "公里", "strategy": "諧音(一路摸透)", "mnemonic": "他跑完了一整公里，累到把路邊的里程碑一路摸透來支撐身體。", "ex": "The school is about one kilometer away from my house.", "grid": 2, "pos_idx": 5 },
+          { "en": "scare...away", "ph": "[skɛr...əˋwe]", "pos": "片語", "cn": "把……嚇跑", "strategy": "圖像(稻草人)", "mnemonic": "田裡穿著大紅袍的稻草人，揮舞著手臂，一下子就把所有烏鴉都把……嚇跑了！", "ex": "The dirty tables and walls in the restaurant scared many customers away.", "grid": 2, "pos_idx": 6 },
+          { "en": "figure out", "ph": "[ˋfɪgjʊr aʊt]", "pos": "片語", "cn": "明白，理解", "strategy": "字根(Figure圖形+Out出來)", "mnemonic": "把黑板上錯綜複雜的Figure（圖形/數字）算Out（出來）之後，我終於明白這題怎麼解了！", "ex": "Jack finally figured out why his friends were laughing at him－his T­shirt was inside out.", "grid": 2, "pos_idx": 7 },
+          { "en": "take...seriously", "ph": "[tek...ˋsɪrɪəslɪ]", "pos": "片語", "cn": "認真看待", "strategy": "諧音(系列鞋子)", "mnemonic": "身為頂級鞋款設計師，他認真看待自己設計的這一整系列鞋子，連一條車縫線都不放過！", "ex": "As a flower shop owner, Linda takes her job seriously and always works very hard.", "grid": 2, "pos_idx": 8 },
+          { "en": "rain or shine", "ph": "[ren ɔr ʃaɪn]", "pos": "片語", "cn": "無論如何，風雨無阻", "strategy": "圖像(半雨半晴)", "mnemonic": "無論如何，不論是下雨（rain）還是出太陽（shine），阿公都風雨無阻去散步。", "ex": "My grandpa takes a walk in the park every evening, rain or shine.", "grid": 2, "pos_idx": 9 },
+          { "en": "pass by", "ph": "[pæs baɪ]", "pos": "片語", "cn": "經過", "strategy": "圖像(過客)", "mnemonic": "當心儀的男生從窗外Pass（經過）而by（旁）時，她眼睛一刻都離不開他。", "ex": "Cindy kept looking at Ray when he passed by our classroom.", "grid": 2, "pos_idx": 10 }
         ];
 
-        // 轉換 GitHub 圖片網址
-        const imageUrls = {
-            1: "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L5G1.jpg",
-            2: "https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L5G2.jpg"
-        };
-
-        // 發音功能
-        const synth = window.speechSynthesis;
-        function speakWord(word, event) {
+        function speakWord(word, event = null) {
             if (event) {
-                event.stopPropagation();
+                event.stopPropagation(); // 防止點擊喇叭時觸發卡片翻轉
             }
-            if (synth.speaking) {
-                synth.cancel();
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; // 稍微放慢語速讓發音更清晰
+                window.speechSynthesis.speak(utterance);
             }
-            const utterThis = new SpeechSynthesisUtterance(word);
-            utterThis.lang = 'en-US';
-            utterThis.rate = 0.9;
-            synth.speak(utterThis);
         }
 
-        const gridContainer = document.getElementById('card-grid');
+        const appGrid = document.getElementById('app-grid');
 
-        vocabData.forEach((item, index) => {
+        vocabData.forEach((item) => {
+            // 計算 4x4 網格中的位置 (0~15)
             const col = item.pos_idx % 4;
             const row = Math.floor(item.pos_idx / 4);
-            const bgPosX = col * (100 / 3);
-            const bgPosY = row * (100 / 3);
-            const imageUrl = imageUrls[item.grid];
+            
+            // 計算 background-position 百分比 (3 等分對應 0%, 33.33%, 66.66%, 100%)
+            let bgPosX = col * (100 / 3);
+            let bgPosY = row * (100 / 3);
+            const bgImage = item.grid === 1 ? g1 : g2;
 
-            // 加入 h-full 確保在 stretch 排版下，卡片容器會填滿列高
-            const cardHTML = `
-                <div class="flip-card-container w-full h-full" onclick="this.classList.toggle('flipped'); if(this.classList.contains('flipped')) { speakWord('${item.en}'); }">
-                    
-                    <!-- 正面呈現 -->
-                    <div class="flip-card-face flip-card-front bg-white rounded-[28px] shadow-[0_12px_30px_rgba(0,0,0,0.08)] flex flex-col h-full overflow-hidden">
-                        <div class="w-full aspect-video relative overflow-hidden flex-shrink-0">
-                            <div class="w-full h-full sprite-img absolute top-0 left-0" 
-                                 style="background-image: url('${imageUrl}'); background-position: ${bgPosX}% ${bgPosY}%;">
+            // 根據您的需求，從 insistence (grid 2, pos_idx 4) 開始微調
+            if (item.grid === 2) {
+                // 第二排 (row === 1)
+                if (row === 1) {
+                     // 略微增加 Y 軸百分比，將圖片往下推，隱藏上方的線條
+                     // 經過測試，406% 放大率下，中間排的 Y 軸定位大約需要補償 1~2%
+                     bgPosY = bgPosY + 1.5; 
+                }
+                // 第三排 (row === 2)
+                else if (row === 2) {
+                     // 回調數值：原本 +1.8 底部仍有一絲絲下一排邊緣，再調小至 +1.1
+                     bgPosY = bgPosY + 1.1; 
+                }
+            }
+
+            // 創建卡片容器
+            const cardElement = document.createElement('div');
+            cardElement.className = 'flip-card';
+            
+            cardElement.innerHTML = `
+                <div class="flip-card-inner">
+                    <!-- 正面呈現 (Visual Cue Panel) -->
+                    <div class="flip-card-front bg-white">
+                        <!-- 影像區：比例 16:9，406% 溢位裁切 -->
+                        <div class="w-full aspect-[16/9] overflow-hidden relative rounded-t-[28px]">
+                            <div class="absolute inset-0 w-full h-full"
+                                 style="background-image: url('${bgImage}'); 
+                                        background-size: 406%; 
+                                        background-position: ${bgPosX}% ${bgPosY}%; 
+                                        background-repeat: no-repeat;">
                             </div>
                         </div>
-                        
-                        <!-- flex-1 會讓文字區域彈性拉伸填滿剩餘高度，解決相鄰卡片高度不一的視覺問題 -->
-                        <div class="flex-1 flex flex-col justify-center items-center p-6 bg-white min-h-[120px]">
-                            <h2 class="text-[#0f172a] text-[2.5rem] font-black leading-none text-center">${item.en}</h2>
-                            <div class="flex items-center justify-center gap-3 mt-3">
-                                <span class="text-[#64748b] text-[1.1rem]">${item.ph}</span>
-                                <button onclick="speakWord('${item.en}', event)" class="text-blue-500 hover:text-blue-600 transition-colors transform hover:scale-110" aria-label="聆聽發音">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd" />
-                                    </svg>
+                        <!-- 文字區 -->
+                        <div class="flex-grow flex flex-col items-center justify-center p-8 text-center">
+                            <h2 class="text-[2.5rem] font-[900] text-[#0f172a] tracking-wide mb-2">${item.en}</h2>
+                            <div class="flex items-center justify-center gap-3">
+                                <span class="text-[1.1rem] text-[#64748b] tracking-wider">${item.ph}</span>
+                                <button onclick="speakWord('${item.en.replace(/'/g, "\\'")}', event)" 
+                                        class="text-2xl hover:scale-110 transition-transform bg-slate-100 p-2 rounded-full text-slate-600 hover:text-blue-500 hover:bg-blue-50">
+                                    🔊
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 反面呈現 -->
-                    <div class="flip-card-face flip-card-back bg-white rounded-[28px] shadow-[0_12px_30px_rgba(0,0,0,0.08)] flex flex-col justify-center p-8 h-full">
-                        <div class="flex flex-col gap-6">
-                            <div>
-                                <h2 class="text-[#0f172a] text-[3.2rem] font-black leading-tight">${item.en}</h2>
-                                <div class="flex flex-wrap items-center gap-4 mt-2">
-                                    <span class="bg-[#e2e8f0] text-[#475569] px-4 py-1.5 rounded-full text-[1.1rem] font-bold italic shadow-sm">${item.pos}</span>
-                                    <span class="text-[1.6rem] font-bold text-gray-800">${item.cn}</span>
-                                </div>
+                    <!-- 反面呈現 (Textual Content Panel) -->
+                    <div class="flip-card-back bg-white p-8 md:p-10 flex flex-col items-center justify-center text-center">
+                        <h2 class="text-[3.2rem] font-[900] text-[#0f172a] leading-none mb-4">${item.en}</h2>
+                        
+                        <div class="flex items-center justify-center flex-wrap gap-3 mb-6">
+                            <span class="text-[1.1rem] bg-[#e2e8f0] text-slate-700 italic font-bold px-4 py-1.5 rounded-md shadow-sm">${item.pos}</span>
+                            <span class="text-[1.6rem] font-bold text-slate-800">${item.cn}</span>
+                        </div>
+
+                        <div class="w-full flex flex-col items-center gap-3 mt-2">
+                            <div class="text-[1.2rem] font-bold text-slate-600">
+                                💡 策略：${item.strategy}
                             </div>
-                            <div class="flex flex-col gap-3">
-                                <div class="text-gray-600 font-semibold text-lg flex items-center gap-2">
-                                    💡 策略：<span>${item.strategy}</span>
-                                </div>
-                                <div class="bg-[#ff9800] text-white rounded-[20px] p-5 text-[1.3rem] font-bold leading-relaxed shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]">
-                                    ${item.mnemonic}
-                                </div>
+                            <!-- 記憶口訣方塊 -->
+                            <div class="bg-[#ff9800] text-white font-bold text-[1.3rem] rounded-[20px] p-5 w-full shadow-md leading-relaxed">
+                                ${item.mnemonic}
                             </div>
-                            <div class="border-t-[1.5px] border-dashed border-gray-300 pt-5 mt-2">
-                                <p class="text-[1.25rem] text-gray-500 italic leading-relaxed">
-                                    "${item.ex}"
-                                </p>
-                            </div>
+                        </div>
+
+                        <!-- 例句區 -->
+                        <div class="w-full mt-8 pt-6 border-t border-dashed border-gray-300">
+                            <p class="text-[1.25rem] text-gray-500 italic leading-relaxed text-left">
+                                "${item.ex}"
+                            </p>
                         </div>
                     </div>
                 </div>
             `;
-            gridContainer.insertAdjacentHTML('beforeend', cardHTML);
+
+            // 點擊翻轉邏輯與自動發音
+            cardElement.addEventListener('click', function() {
+                this.classList.toggle('flipped');
+                // 翻面到背面時自動發音
+                if (this.classList.contains('flipped')) {
+                    speakWord(item.en);
+                }
+            });
+
+            appGrid.appendChild(cardElement);
         });
     </script>
 </body>
