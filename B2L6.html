@@ -1,134 +1,209 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>正在大改造中 | 敬請期待</title>
-    <!-- 引入 Tailwind CSS 用於快速佈局 -->
+    <title>🧠 B2L6 互動單字記憶卡</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide 圖示庫 -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob {
-            animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-            animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-            animation-delay: 4s;
-        }
-        
         body {
-            background-color: #F0F7FF;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
-        .social-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 3rem;
-            height: 3rem;
+        .flip-card {
+            perspective: 1500px;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 使用 Grid 疊加技術，讓卡片高度能隨正反面內容自動撐開，無需固定高度 */
+        .flip-card-inner {
+            display: grid;
+            grid-template-columns: 1fr;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            border-radius: 28px;
             background-color: white;
-            color: #94a3b8;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            height: 100%;
         }
 
-        .social-icon:hover {
-            color: white;
-            transform: translateY(-0.5rem);
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
         }
 
-        .hover-sky:hover { background-color: #38bdf8; }
-        .hover-pink:hover { background-color: #ec4899; }
-        .hover-slate:hover { background-color: #1e293b; }
-        .hover-emerald:hover { background-color: #10b981; }
+        .flip-card-front, .flip-card-back {
+            grid-area: 1 / 1;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 28px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* 隱藏捲軸保持美觀 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
     </style>
 </head>
-<body class="relative min-h-screen w-full flex items-center justify-center">
+<body class="py-10 px-4 md:px-8">
 
-    <!-- 裝飾性背景元素 - 漂浮的圓圈 -->
-    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="absolute top-[10%] left-[15%] w-32 h-32 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div class="absolute top-[20%] right-[20%] w-40 h-40 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div class="absolute bottom-[20%] left-[25%] w-36 h-36 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-    </div>
+    <header class="max-w-5xl mx-auto mb-10 text-center">
+        <h1 class="text-4xl md:text-5xl font-black text-[#0f172a] mb-4 tracking-tight">🧠 B2L6 互動單字記憶卡</h1>
+        <p class="text-[#64748b] text-lg">點擊卡片進行翻轉，並自動聆聽發音</p>
+    </header>
 
-    <!-- 底部波浪裝飾 -->
-    <div class="absolute bottom-0 left-0 w-full leading-[0] z-0">
-        <svg viewBox="0 0 1440 320" class="w-full h-auto">
-            <path 
-                fill="#3B82F6" 
-                fill-opacity="1" 
-                d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-            ></path>
-        </svg>
-    </div>
-
-    <!-- 主要內容區塊 -->
-    <main class="relative z-10 flex flex-col items-center text-center px-6">
-        
-        <!-- 插畫角色 / 圖示組合 -->
-        <div class="relative mb-10 group">
-            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl transition-transform duration-500 hover:scale-110">
-                <div class="relative">
-                    <i data-lucide="construction" class="w-16 h-16 text-blue-500 animate-bounce"></i>
-                    <div class="absolute -top-4 -right-4 rotate-12">
-                        <i data-lucide="hard-hat" class="w-10 h-10 text-yellow-500"></i>
-                    </div>
-                </div>
-            </div>
-            <!-- 裝飾小方塊 -->
-            <div class="absolute -top-2 -left-2 w-6 h-6 bg-yellow-400 rounded-md rotate-12 animate-pulse"></div>
-            <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-400 rounded-full animate-bounce"></div>
-        </div>
-
-        <!-- 文字標題 -->
-        <div class="space-y-4">
-            <h1 class="text-5xl sm:text-7xl font-black text-slate-800 tracking-tight">
-                正在大改造中 <span class="inline-block animate-pulse text-blue-500">!</span>
-            </h1>
-            <p class="text-xl sm:text-2xl font-bold text-slate-500">
-                很快就會和大家見面了。
-            </p>
-        </div>
-
-        <!-- 描述文字 -->
-        <p class="mt-8 text-slate-400 max-w-md font-medium leading-relaxed">
-            我們正在努力完善網站的每一個細節，<br />
-            為了帶給你最棒的體驗，請再稍等一下下！
-        </p>
-
-        <!-- 社交媒體按鈕 -->
-        <div class="mt-12 flex gap-6">
-            <a href="#" class="social-icon hover-sky"><i data-lucide="twitter"></i></a>
-            <a href="#" class="social-icon hover-pink"><i data-lucide="instagram"></i></a>
-            <a href="#" class="social-icon hover-slate"><i data-lucide="github"></i></a>
-            <a href="#" class="social-icon hover-emerald"><i data-lucide="globe"></i></a>
-        </div>
-
-        <!-- 頁尾小字 -->
-        <div class="mt-20">
-            <p class="text-white text-sm font-bold tracking-widest uppercase opacity-80">
-                © 2026 Your Brand Studio
-            </p>
-        </div>
+    <main id="app-grid" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <!-- 卡片將由 JavaScript 動態生成 -->
     </main>
 
     <script>
-        // 初始化 Lucide 圖示
-        lucide.createIcons();
+        const g1 = 'https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L6G1.jpg';
+        const g2 = 'https://raw.githubusercontent.com/terenceylhc/vocB2/main/B2L6G2.jpg';
+
+        const vocabData = [
+          { "en": "bargain", "ph": "[ˋbɑrgən]", "pos": "n./vi.", "cn": "特價商品/討價還價", "strategy": "諧音(把根)", "mnemonic": "把這根大香蕉把根拔走，老闆算你特價商品，不用再討價還價了！", "ex": "I spent only NT$100 getting ten giant packs of toilet paper. It was a real bargain!", "grid": 1, "pos_idx": 0 },
+          { "en": "quality", "ph": "[ˋkwɑlətɪ]", "pos": "n.", "cn": "品質", "strategy": "諧音(誇落去)", "mnemonic": "這家店的品質好到讓人豎起大拇指誇落去！", "ex": "The driver is mad about the poor quality of the road. There are too many holes in it.", "grid": 1, "pos_idx": 1 },
+          { "en": "company", "ph": "[ˋkʌmpənɪ]", "pos": "n.", "cn": "公司", "strategy": "諧音(看陪你)", "mnemonic": "這家公司的福利超讚，就看陪你加班的主管會不會發零食。", "ex": "This company produces the best bicycles in the world.", "grid": 1, "pos_idx": 2 },
+          { "en": "career", "ph": "[kəˋrɪr]", "pos": "n.", "cn": "職業生涯，事業", "strategy": "諧音(可以、啊！)", "mnemonic": "主管對他的整個職業生涯評估後說：看這優秀的業績，升遷可以、啊！", "ex": "Rafael Nadal started his tennis career at the age of 16.", "grid": 1, "pos_idx": 3 },
+          { "en": "explode", "ph": "[ɪkˋsplod]", "pos": "vi.", "cn": "爆炸", "strategy": "諧音(一口破)", "mnemonic": "這顆巨無霸氣球被他用嘴巴一口破壞，瞬間爆炸了！", "ex": "Because Megan shook the soda, it exploded when she opened the can.", "grid": 1, "pos_idx": 4 },
+          { "en": "injure", "ph": "[ˋɪndʒɚ]", "pos": "vt.", "cn": "使受傷", "strategy": "諧音(硬折)", "mnemonic": "這根鋼筋被大力士硬折，反彈回來反而使受傷了。", "ex": "Marcus was seriously injured after he fell down the stairs.", "grid": 1, "pos_idx": 5 },
+          { "en": "instead", "ph": "[ɪnˋstɛd]", "pos": "adv.", "cn": "相反地，卻", "strategy": "諧音(硬死盯)", "mnemonic": "本來該去看電影，他相反地不肯走，硬死盯著店裡的玩具不放。", "ex": "Andy’s fingers were hurt, so I cooked instead.", "grid": 1, "pos_idx": 6 },
+          { "en": "improve", "ph": "[ɪmˋpruv]", "pos": "vt.", "cn": "改進，改善", "strategy": "諧音(銀鋪路)", "mnemonic": "為了改進交通，政府用銀鋪路，馬路變得亮晶晶。", "ex": "To improve her English, Helen listens to English radio programs every day.", "grid": 1, "pos_idx": 7 },
+          { "en": "skill", "ph": "[skɪl]", "pos": "n.", "cn": "技巧，技能", "strategy": "諧音(四勾)", "mnemonic": "這個魔術師非常有技巧，能用四勾在空中同時勾住四個飛行的火圈！", "ex": "Mr. Hu is famous for his skills in decorating traditional temples.", "grid": 1, "pos_idx": 8 },
+          { "en": "demand", "ph": "[dɪˋmænd]", "pos": "vt./n.", "cn": "要求；需求", "strategy": "諧音(地毯/底面)", "mnemonic": "顧客要求退款，氣到把大地毯翻過來，說連這底面（demand）都有瑕疵，市場沒這需求！", "ex": "The customer is demanding a refund for the broken hair dryer he bought yesterday.", "grid": 1, "pos_idx": 9 },
+          { "en": "product", "ph": "[ˋprɑdəkt]", "pos": "n.", "cn": "產品", "strategy": "諧音(Pro 鴨子)", "mnemonic": "這家科技工廠研發的新產品，是一隻戴著智能眼鏡的 Pro 級鴨子！", "ex": "The colorful masking tapes are the most popular product in this shop.", "grid": 1, "pos_idx": 10 },
+          { "en": "supply", "ph": "[səˋplaɪ]", "pos": "vt./n.", "cn": "提供，供應/供應量", "strategy": "諧音(沙排)", "mnemonic": "夏天海灘辦沙排大賽，主辦方免費提供無限量的椰子汁，供應量充足！", "ex": "The hotel supplies its guests with umbrellas for free when it rains.", "grid": 1, "pos_idx": 11 },
+          { "en": "succeed", "ph": "[səkˋsid]", "pos": "vi.", "cn": "成功", "strategy": "諧音(一口氣吸)", "mnemonic": "他一口氣吸起了一顆超大珍珠，終於成功喝完這杯飲料！", "ex": "With the food in his hand, Nick succeeded in attracting several ducks to come near him.", "grid": 1, "pos_idx": 12 },
+          { "en": "gentle", "ph": "[ˋdʒɛntḷ]", "pos": "adj.", "cn": "溫柔的", "strategy": "諧音(枕頭)", "mnemonic": "爸爸用像枕頭一樣溫柔的聲音，在床邊讀故事書。", "ex": "The father read a bedtime story to his daughter in a gentle voice.", "grid": 1, "pos_idx": 13 },
+          { "en": "clay", "ph": "[kle]", "pos": "n.", "cn": "陶土，泥土", "strategy": "諧音(可累)", "mnemonic": "用這堆陶土捏一隻巨馬真可累死我了！", "ex": "The artist used clay to shape a beautiful vase.", "grid": 1, "pos_idx": 14 },
+          { "en": "flock", "ph": "[flɑk]", "pos": "vi.", "cn": "聚集，蜂擁", "strategy": "諧音(扶老客)", "mnemonic": "百貨公司大特價，店員們扶老客進門，因為門口聚集了蜂擁而入的人潮！", "ex": "Thousands of fans flocked to the stadium to see the pop star.", "grid": 2, "pos_idx": 0 },
+          { "en": "mug", "ph": "[mʌg]", "pos": "n.", "cn": "馬克杯", "strategy": "圖像(貓咪耳朵)", "mnemonic": "這個大馬克杯上印著一隻貓咪，杯把做成貓咪耳朵的形狀，超級萌！", "ex": "She drank a hot mug of cocoa to warm up.", "grid": 2, "pos_idx": 1 },
+          { "en": "ceramics", "ph": "[səˋræmɪks]", "pos": "n.", "cn": "陶瓷工藝", "strategy": "諧音(洗拉摸)", "mnemonic": "為了學習頂級的陶瓷工藝，他跑到山上去洗泥土、拉坏、摸捏作品。", "ex": "The museum is famous for its collection of ancient Chinese ceramics.", "grid": 2, "pos_idx": 2 },
+          { "en": "pottery", "ph": "[ˋpɑtərɪ]", "pos": "n.", "cn": "陶器", "strategy": "諧音(跑特利)", "mnemonic": "哈利波特跑特利害，竟然用魔法在三秒內變出一個精美的陶器大花瓶！", "ex": "She bought a beautiful piece of pottery at the local market.", "grid": 2, "pos_idx": 3 },
+          { "en": "insistence", "ph": "[ɪnˋsɪstəns]", "pos": "n.", "cn": "堅持", "strategy": "諧音(硬是要省)", "mnemonic": "大熱天他出於對省錢的堅持，硬是要省那幾塊錢，絕對不開冷氣！", "ex": "Because of his insistence on quality, the restaurant became very successful.", "grid": 2, "pos_idx": 4 },
+          { "en": "kilometer", "ph": "[ˋkɪlə͵mitɚ]", "pos": "n.", "cn": "公里", "strategy": "諧音(一路摸透)", "mnemonic": "他跑完了一整公里，累到把路邊的里程碑一路摸透來支撐身體。", "ex": "The school is about one kilometer away from my house.", "grid": 2, "pos_idx": 5 },
+          { "en": "scare...away", "ph": "[skɛr...əˋwe]", "pos": "片語", "cn": "把……嚇跑", "strategy": "圖像(稻草人)", "mnemonic": "田裡穿著大紅袍的稻草人，揮舞著手臂，一下子就把所有烏鴉都把……嚇跑了！", "ex": "The dirty tables and walls in the restaurant scared many customers away.", "grid": 2, "pos_idx": 6 },
+          { "en": "figure out", "ph": "[ˋfɪgjʊr aʊt]", "pos": "片語", "cn": "明白，理解", "strategy": "字根(Figure圖形+Out出來)", "mnemonic": "把黑板上錯綜複雜的Figure（圖形/數字）算Out（出來）之後，我終於明白這題怎麼解了！", "ex": "Jack finally figured out why his friends were laughing at him－his T­shirt was inside out.", "grid": 2, "pos_idx": 7 },
+          { "en": "take...seriously", "ph": "[tek...ˋsɪrɪəslɪ]", "pos": "片語", "cn": "認真看待", "strategy": "諧音(系列鞋子)", "mnemonic": "身為頂級鞋款設計師，他認真看待自己設計的這一整系列鞋子，連一條車縫線都不放過！", "ex": "As a flower shop owner, Linda takes her job seriously and always works very hard.", "grid": 2, "pos_idx": 8 },
+          { "en": "rain or shine", "ph": "[ren ɔr ʃaɪn]", "pos": "片語", "cn": "無論如何，風雨無阻", "strategy": "圖像(半雨半晴)", "mnemonic": "無論如何，不論是下雨（rain）還是出太陽（shine），阿公都風雨無阻去散步。", "ex": "My grandpa takes a walk in the park every evening, rain or shine.", "grid": 2, "pos_idx": 9 },
+          { "en": "pass by", "ph": "[pæs baɪ]", "pos": "片語", "cn": "經過", "strategy": "圖像(過客)", "mnemonic": "當心儀的男生從窗外Pass（經過）而by（旁）時，她眼睛一刻都離不開他。", "ex": "Cindy kept looking at Ray when he passed by our classroom.", "grid": 2, "pos_idx": 10 }
+        ];
+
+        function speakWord(word, event = null) {
+            if (event) {
+                event.stopPropagation(); // 防止點擊喇叭時觸發卡片翻轉
+            }
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; // 稍微放慢語速讓發音更清晰
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        const appGrid = document.getElementById('app-grid');
+
+        vocabData.forEach((item) => {
+            // 計算 4x4 網格中的位置 (0~15)
+            const col = item.pos_idx % 4;
+            const row = Math.floor(item.pos_idx / 4);
+            
+            // 計算 background-position 百分比 (3 等分對應 0%, 33.33%, 66.66%, 100%)
+            const bgPosX = col * (100 / 3);
+            const bgPosY = row * (100 / 3);
+            const bgImage = item.grid === 1 ? g1 : g2;
+
+            // 創建卡片容器
+            const cardElement = document.createElement('div');
+            cardElement.className = 'flip-card';
+            
+            cardElement.innerHTML = `
+                <div class="flip-card-inner">
+                    <!-- 正面呈現 (Visual Cue Panel) -->
+                    <div class="flip-card-front bg-white">
+                        <!-- 影像區：比例 16:9，406% 溢位裁切 -->
+                        <div class="w-full aspect-[16/9] overflow-hidden relative rounded-t-[28px]">
+                            <div class="absolute inset-0 w-full h-full"
+                                 style="background-image: url('${bgImage}'); 
+                                        background-size: 406%; 
+                                        background-position: ${bgPosX}% ${bgPosY}%; 
+                                        background-repeat: no-repeat;">
+                            </div>
+                        </div>
+                        <!-- 文字區 -->
+                        <div class="flex-grow flex flex-col items-center justify-center p-8 text-center">
+                            <h2 class="text-[2.5rem] font-[900] text-[#0f172a] tracking-wide mb-2">${item.en}</h2>
+                            <div class="flex items-center justify-center gap-3">
+                                <span class="text-[1.1rem] text-[#64748b] tracking-wider">${item.ph}</span>
+                                <button onclick="speakWord('${item.en.replace(/'/g, "\\'")}', event)" 
+                                        class="text-2xl hover:scale-110 transition-transform bg-slate-100 p-2 rounded-full text-slate-600 hover:text-blue-500 hover:bg-blue-50">
+                                    🔊
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 反面呈現 (Textual Content Panel) -->
+                    <div class="flip-card-back bg-white p-8 md:p-10 flex flex-col items-center justify-center text-center">
+                        <h2 class="text-[3.2rem] font-[900] text-[#0f172a] leading-none mb-4">${item.en}</h2>
+                        
+                        <div class="flex items-center justify-center flex-wrap gap-3 mb-6">
+                            <span class="text-[1.1rem] bg-[#e2e8f0] text-slate-700 italic font-bold px-4 py-1.5 rounded-md shadow-sm">${item.pos}</span>
+                            <span class="text-[1.6rem] font-bold text-slate-800">${item.cn}</span>
+                        </div>
+
+                        <div class="w-full flex flex-col items-center gap-3 mt-2">
+                            <div class="text-[1.2rem] font-bold text-slate-600">
+                                💡 策略：${item.strategy}
+                            </div>
+                            <!-- 記憶口訣方塊 -->
+                            <div class="bg-[#ff9800] text-white font-bold text-[1.3rem] rounded-[20px] p-5 w-full shadow-md leading-relaxed">
+                                ${item.mnemonic}
+                            </div>
+                        </div>
+
+                        <!-- 例句區 -->
+                        <div class="w-full mt-8 pt-6 border-t border-dashed border-gray-300">
+                            <p class="text-[1.25rem] text-gray-500 italic leading-relaxed text-left">
+                                "${item.ex}"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 點擊翻轉邏輯與自動發音
+            cardElement.addEventListener('click', function() {
+                this.classList.toggle('flipped');
+                // 翻面到背面時自動發音
+                if (this.classList.contains('flipped')) {
+                    speakWord(item.en);
+                }
+            });
+
+            appGrid.appendChild(cardElement);
+        });
     </script>
 </body>
 </html>
